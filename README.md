@@ -1,5 +1,7 @@
 # CodePrep Python - Interactive Universal LeetCode Practice Suite
 
+🔗 **Live Demo:** [https://ritwik12.github.io/CodePrep/](https://ritwik12.github.io/CodePrep/)
+
 CodePrep Python is an advanced, fully client-side web application designed to help developers practice algorithmic coding problems (specifically LeetCode-style questions) directly in the browser. 
 
 Using **Pyodide** (Python compiled to WebAssembly) and the **Monaco Editor** (the engine behind VS Code), CodePrep provides a full-featured development environment without requiring any backend server or external compiler.
