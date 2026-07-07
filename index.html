@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodePrep - Interactive Universal LeetCode Practice Suite</title>
+    <meta name="description" content="Master LeetCode questions with custom test-case runner, local storage solution caching, custom question editor, and dynamic algorithmic debugger.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1">
+    
+    <!-- Load Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <!-- Load Pyodide for Python execution support -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+        <div class="header-left">
+            <div class="logo-container">
+                <div class="logo-icon">&lt;/&gt;</div>
+                <h1 class="logo-text">CodePrep Python</h1>
+            </div>
+            <div class="header-nav-tabs" id="header-tabs">
+                <button id="tab-nav-dashboard" class="nav-tab active">Practice Arena</button>
+                <button id="tab-nav-roadmap" class="nav-tab">Interview Prep</button>
+            </div>
+        </div>
+        <div class="nav-controls">
+            <button id="btn-back" class="btn-back-dashboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Dashboard
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main>
+        
+        <!-- View 1: Dashboard -->
+        <section id="dashboard-view" class="dashboard-view">
+            <div class="welcome-section">
+                <h2 class="welcome-title">Universal LeetCode Practice Arena</h2>
+                <p class="welcome-subtitle">
+                    Compile and execute answers locally, visual-debug stack expressions, and create your own custom coding questions.
+                </p>
+            </div>
+
+            <!-- Filters & Custom Problem Button -->
+            <div class="filter-controls-row">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search by title...">
+                </div>
+                <div class="select-filters">
+                    <select id="filter-category" title="Filter by Category">
+                        <option value="all">All Categories</option>
+                        <option value="Stack & Parsers">Stack & Parsers</option>
+                        <option value="Graphs & Cycle Detection">Graphs & Cycle Detection</option>
+                        <option value="Advanced LLD & Dependencies">Advanced LLD & Dependencies</option>
+                        <option value="Arrays & Hashing">Arrays & Hashing</option>
+                        <option value="Sliding Window">Sliding Window</option>
+                        <option value="Dynamic Programming">Dynamic Programming</option>
+                    </select>
+                    <select id="filter-difficulty" title="Filter by Difficulty">
+                        <option value="all">All Difficulties</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <button id="btn-add-problem" class="btn-add-problem">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    New Question
+                </button>
+            </div>
+            
+            <div id="problems-grid" class="problems-grid">
+                <!-- Loaded dynamically by app.js -->
+            </div>
+        </section>
+
+        <!-- View 3: Interview Prep Roadmap -->
+        <section id="roadmap-view" class="roadmap-view" style="display: none;">
+            <div class="roadmap-header">
+                <div class="roadmap-hero">
+                    <h2 class="welcome-title">Python Technical Interview Prep Roadmap</h2>
+                    <p class="welcome-subtitle">Master Python fluency, structured interview workflows, and complex graph / LLD dependency modeling patterns.</p>
+                </div>
+                
+                <!-- Quick Actions Panel -->
+                <div class="roadmap-quick-actions">
+                    <div class="action-card">
+                        <h3>⚡ Mock Interview Mode</h3>
+                        <p>Simulate a real 60-minute interview. We'll pick a random question, hide the test cases, and start the countdown timer.</p>
+                        <button id="btn-random-mock" class="btn-visualize" style="margin-top: 1rem; width: 100%;">Start Mock Interview</button>
+                    </div>
+                    <div class="action-card">
+                        <h3>📈 Prep Progress Tracker</h3>
+                        <div id="prep-progress-stats" style="margin-top: 0.5rem;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs for Roadmap Sections -->
+            <div class="roadmap-tabs-container">
+                <div class="roadmap-tabs">
+                    <button class="roadmap-tab-btn active" data-roadmap-tab="python-fluency">Python Fluency</button>
+                    <button class="roadmap-tab-btn" data-roadmap-tab="interview-workflow">Interview Workflow</button>
+                    <button class="roadmap-tab-btn" data-roadmap-tab="dsa-patterns">Core DSA Patterns</button>
+                    <button class="roadmap-tab-btn" data-roadmap-tab="dependency-modeling">Advanced Dependency & Parsers</button>
+                    <button class="roadmap-tab-btn" data-roadmap-tab="checklists">Edge-Cases & Checklists</button>
+                </div>
+                
+                <div class="roadmap-tab-content active" id="python-fluency">
+                    <div class="roadmap-card">
+                        <h3>🐍 Python Standard Libraries for DSA</h3>
+                        <p>Python's standard library is incredibly powerful. Knowing these collections and utilities is crucial for writing clean code under pressure.</p>
+                        
+                        <div class="code-snippets-grid">
+                            <div class="snippet-box">
+                                <h4>1. Priority Queue: <code>heapq</code></h4>
+                                <pre><code>import heapq
+# Min-Heap
+heap = []
+heapq.heappush(heap, 4)
+heapq.heappush(heap, 1)
+min_val = heapq.heappop(heap) # 1
+
+# Max-Heap (negate values)
+max_heap = []
+heapq.heappush(max_heap, -4)
+max_val = -heapq.heappop(max_heap) # 4
+
+# Heapify in-place: O(N)
+nums = [3, 2, 1]
+heapq.heapify(nums)</code></pre>
+                            </div>
+                            <div class="snippet-box">
+                                <h4>2. Double-Ended Queue: <code>collections.deque</code></h4>
+                                <pre><code>from collections import deque
+# O(1) appends and pops from both ends
+queue = deque([1, 2, 3])
+queue.append(4)
+queue.appendleft(0)
+val = queue.popleft() # 0
+val = queue.pop() # 4</code></pre>
+                            </div>
+                            <div class="snippet-box">
+                                <h4>3. Default Dict: <code>collections.defaultdict</code></h4>
+                                <pre><code>from collections import defaultdict
+# Avoid KeyError, initialize missing keys automatically
+adj = defaultdict(list)
+adj['A'].append('B') # Automatically creates list
+
+count = defaultdict(int)
+count['apple'] += 1 # Starts at 0</code></pre>
+                            </div>
+                            <div class="snippet-box">
+                                <h4>4. Counter: <code>collections.Counter</code></h4>
+                                <pre><code>from collections import Counter
+# Hash map for counting elements
+freq = Counter("abacaba") # {'a': 4, 'b': 2, 'c': 1}
+top_two = freq.most_common(2) # [('a', 4), ('b', 2)]</code></pre>
+                            </div>
+                            <div class="snippet-box">
+                                <h4>5. Binary Search: <code>bisect</code></h4>
+                                <pre><code>import bisect
+# Binary search on sorted lists
+arr = [1, 3, 3, 6, 7]
+# Find insertion point for 3 (right index)
+idx = bisect.bisect_right(arr, 3) # 3 (index after the 3s)
+idx = bisect.bisect_left(arr, 3) # 1 (first index of 3)</code></pre>
+                            </div>
+                            <div class="snippet-box">
+                                <h4>6. Memoization: <code>functools.lru_cache</code></h4>
+                                <pre><code>from functools import lru_cache
+# Auto-cache recursive function calls
+@lru_cache(maxsize=None)
+def fib(n):
+    if n &lt; 2: return n
+    return fib(n-1) + fib(n-2)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="roadmap-tab-content" id="interview-workflow">
+                    <div class="roadmap-card">
+                        <h3>🔄 The 6-Step Interview Workflow</h3>
+                        <p>Follow this exact chronological structure during the technical interview. Do not jump into coding immediately!</p>
+                        <div class="workflow-steps">
+                            <div class="workflow-step">
+                                <div class="step-num">1</div>
+                                <div>
+                                    <h4>Clarify Requirements & Edge Cases</h4>
+                                    <p>Ask clarifying questions: "Is the graph connected?", "Are negative values possible?", "Can the inputs contain duplicates?"</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="step-num">2</div>
+                                <div>
+                                    <h4>Explore Constraints & Scale</h4>
+                                    <p>Check the maximum constraints: "If N is 10^5, an O(N^2) solution will TLE. We need O(N) or O(N log N)."</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="step-num">3</div>
+                                <div>
+                                    <h4>Formulate Brute Force</h4>
+                                    <p>Explain a brute force approach. Mention its complexity. This guarantees you have a baseline solution.</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="step-num">4</div>
+                                <div>
+                                    <h4>Optimize Design</h4>
+                                    <p>Pivot to optimal structures (e.g. hash maps, heaps, two pointers). Walk through your algorithm logic verbally before coding.</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="step-num">5</div>
+                                <div>
+                                    <h4>Write Clean Code</h4>
+                                    <p>Write modular code. Use descriptive variable names. Explain your implementation as you type it.</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="step-num">6</div>
+                                <div>
+                                    <h4>Dry Run & Analyze Complexity</h4>
+                                    <p>Manually trace your code with a small test case. Finally, state the exact Big-O Time and Space complexities.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="roadmap-tab-content" id="dsa-patterns">
+                    <div class="roadmap-card">
+                        <h3>💡 Core DSA Interview Patterns</h3>
+                        <div class="dsa-grid">
+                            <div class="dsa-card">
+                                <h4>Arrays & Hashing</h4>
+                                <p>Used for fast lookups (O(1)). Use frequency Counters or prefix sums. Keep track of indices or complements.</p>
+                            </div>
+                            <div class="dsa-card">
+                                <h4>Two Pointers</h4>
+                                <p>Use on sorted arrays to scan from ends inwards (like 2Sum) or fast/slow pointers (detecting cycles).</p>
+                            </div>
+                            <div class="dsa-card">
+                                <h4>Sliding Window</h4>
+                                <p>Contiguous sub-array search. Expand the right pointer, shrink the left pointer once constraints are violated.</p>
+                            </div>
+                            <div class="dsa-card">
+                                <h4>Stack</h4>
+                                <p>Ideal for nested structures, string parses, or monotonic search patterns (e.g. next greater element).</p>
+                            </div>
+                            <div class="dsa-card">
+                                <h4>Trees</h4>
+                                <p>Master DFS (Pre, In, Post order) and BFS (level-order). Know Binary Search Tree (BST) operations.</p>
+                            </div>
+                            <div class="dsa-card">
+                                <h4>Graphs</h4>
+                                <p>Represent via adjacency lists. Cycle detection (BFS Kahn / DFS coloring). Shortest path (BFS / Dijkstra).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-tab-content" id="dependency-modeling">
+                    <div class="roadmap-card">
+                        <h3>🕸️ Advanced Dependency & Parsing Patterns</h3>
+                        <div class="adv-pattern-row">
+                            <div class="adv-pattern-col">
+                                <h4>1. Graph Dependency Modeling</h4>
+                                <p>Problems like <strong>Course Schedule</strong>, <strong>Alien Dictionary</strong>, and <strong>Parallel Courses</strong> represent dependencies as directed edges. Build the adjacency list and in-degrees, then apply topological sort.</p>
+                                <ul>
+                                    <li><strong>Kahn's Algorithm:</strong> Queue processes nodes with 0 incoming dependencies.</li>
+                                    <li><strong>DFS Topological Sort:</strong> Post-order traversal reversed.</li>
+                                </ul>
+                            </div>
+                            <div class="adv-pattern-col">
+                                <h4>2. Spreadsheet/Excel Propagation</h4>
+                                <p>Excel cells require recalculation when dependencies change. This can be eager (write-time propagation via DFS) or lazy (read-time recursion with memoization).</p>
+                                <ul>
+                                    <li>Track cell dependencies (e.g. <code>A1 -> C3</code>).</li>
+                                    <li>Detect and raise errors for circular loops.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="adv-pattern-row" style="margin-top: 1.5rem;">
+                            <div class="adv-pattern-col">
+                                <h4>3. String Parsing & Calculators</h4>
+                                <p>String parser problems (like <strong>Basic Calculator</strong> and <strong>Decode String</strong>) use stack structures to handle parentheses and order of operations.</p>
+                                <ul>
+                                    <li>Save current context <code>(running_sum, sign)</code> onto a stack when encountering <code>'('</code>.</li>
+                                    <li>Use Shunting-Yard algorithm for operator precedence (*, /, +, -).</li>
+                                </ul>
+                            </div>
+                            <div class="adv-pattern-col">
+                                <h4>4. Complex Data Structure Design</h4>
+                                <p>Combining multiple structures allows O(1) operations. For example, <strong>LRU Cache</strong> uses a Doubly Linked List for insertion order and a Hash Map for fast node retrieval.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="roadmap-tab-content" id="checklists">
+                    <div class="roadmap-card">
+                        <h3>📝 Technical Checklists</h3>
+                        <div class="checklists-grid">
+                            <div class="chk-box">
+                                <h4>⚠️ Edge-Case Checklist</h4>
+                                <ul>
+                                    <li>Empty values or null inputs</li>
+                                    <li>Single element arrays or lists</li>
+                                    <li>Negative integers or zero</li>
+                                    <li>Duplicate keys, values, or items</li>
+                                    <li>Cycles or loops in graphs/linked lists</li>
+                                    <li>Odd vs even lengths of strings/arrays</li>
+                                    <li>Off-by-one indices</li>
+                                </ul>
+                            </div>
+                            <div class="chk-box">
+                                <h4>📋 Mock Interview Self-Evaluation</h4>
+                                <ul>
+                                    <li>Did I ask clarifying questions first?</li>
+                                    <li>Did I discuss constraints and input boundaries?</li>
+                                    <li>Did I explain the time and space complexity of my draft solutions?</li>
+                                    <li>Did I write modular code with logical functions?</li>
+                                    <li>Did I manually dry run the code with variables tracked?</li>
+                                    <li>Did I double-check boundary conditions (e.g. 0, empty)?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 2: Interactive Workspace -->
+        <section id="workspace-view" class="workspace-view">
+            
+            <!-- Left Pane: Problem details, solutions, visual debugger -->
+            <div class="info-pane">
+                <nav class="pane-tabs">
+                    <button class="tab-btn active" data-tab="problem-description">Description</button>
+                    <button class="tab-btn" data-tab="problem-explanation">Approach & Template</button>
+                    <button id="tab-visualizer" class="tab-btn" data-tab="visualizer-sandbox">Visual Debugger</button>
+                </nav>
+                
+                <div class="pane-content">
+                    
+                    <!-- Tab 1: Description -->
+                    <div id="problem-description" class="tab-content active">
+                        <div class="problem-info-header">
+                            <h3 id="problem-title" class="problem-info-title">Loading Problem...</h3>
+                            <a id="leetcode-link" href="#" target="_blank" class="leetcode-link">
+                                View on LeetCode
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                        </div>
+
+                        <!-- Interview Checklist Widget -->
+                        <div class="interview-checklist-card">
+                            <div class="checklist-header" id="checklist-toggle">
+                                <span>📋 Interview Stage Checklist</span>
+                                <span class="checklist-chevron" id="checklist-chevron">▼</span>
+                            </div>
+                            <div class="checklist-body" id="checklist-body">
+                                <label class="checklist-item">
+                                    <input type="checkbox" id="chk-clarify">
+                                    <span class="chk-label"><strong>Clarify:</strong> Ask questions, verify inputs/outputs & edge cases.</span>
+                                </label>
+                                <label class="checklist-item">
+                                    <input type="checkbox" id="chk-constraints">
+                                    <span class="chk-label"><strong>Constraints:</strong> Identify time/space limits and data ranges.</span>
+                                </label>
+                                <label class="checklist-item">
+                                    <input type="checkbox" id="chk-bruteforce">
+                                    <span class="chk-label"><strong>Brute Force:</strong> State a basic solution and its complexity.</span>
+                                </label>
+                                <label class="checklist-item">
+                                    <input type="checkbox" id="chk-optimal">
+                                    <span class="chk-label"><strong>Optimal Solution:</strong> Design and explain before coding.</span>
+                                </label>
+                                <label class="checklist-item">
+                                    <input type="checkbox" id="chk-dryrun">
+                                    <span class="chk-label"><strong>Dry Run:</strong> Trace code with sample input before running.</span>
+                                </label>
+                                <label class="checklist-item">
+                                    <input type="checkbox" id="chk-complexity">
+                                    <span class="chk-label"><strong>Complexity:</strong> Analyze final Big-O time and space.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="problem-desc-container" class="problem-description-text">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="problem-notes-container">
+                            <label for="problem-notes-area">📝 Personal Solution Notes</label>
+                            <textarea id="problem-notes-area" rows="4" placeholder="Jot down hints, dry runs, or key patterns..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Explanation & Code template -->
+                    <div id="problem-explanation" class="tab-content">
+                        <div id="explanation-content" class="explanation-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Visual Stack Sandbox Debugger -->
+                    <div id="visualizer-sandbox" class="tab-content">
+                        <div class="visualizer-sandbox">
+                            <div class="visualizer-input-group">
+                                <input type="text" id="visualizer-expr-input" placeholder="e.g. 2 * (3 + 5 / 2)">
+                                <button id="btn-visualize" class="btn-visualize">Load</button>
+                            </div>
+                            
+                            <!-- Control Panel -->
+                            <div class="visualizer-controls">
+                                <button id="btn-vis-reset" class="control-btn" title="Reset">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17a6 6 0 0 0-6-6H3m0 0l4-4m-4 4l4 4"></path><path d="M13 7a6 6 0 0 1 6 6v4m0 0l-4-4m4 4l4-4"></path></svg>
+                                </button>
+                                <button id="btn-vis-prev" class="control-btn" title="Step Back">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                                </button>
+                                <button id="btn-vis-play" class="control-btn" title="Auto Play">▶</button>
+                                <button id="btn-vis-next" class="control-btn" title="Step Forward">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                                </button>
+                                
+                                <select id="vis-speed" class="playback-speed" title="Playback Speed">
+                                    <option value="2000">Slow (2s)</option>
+                                    <option value="1000" selected>Normal (1s)</option>
+                                    <option value="500">Fast (0.5s)</option>
+                                </select>
+                            </div>
+
+                            <!-- Visualization Display Grid -->
+                            <div class="visualizer-display">
+                                <div id="expr-display" class="highlighted-expression-box">
+                                    <!-- Expression with dynamic highlight character -->
+                                </div>
+                                
+                                <div class="stacks-container">
+                                    <!-- Operators Stack -->
+                                    <div class="stack-column">
+                                        <div class="stack-title">Operator Stack (Ops)</div>
+                                        <div id="ops-stack-visualizer" class="stack-visualizer">
+                                            <span class="stack-empty">Empty</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Values Stack -->
+                                    <div class="stack-column">
+                                        <div class="stack-title">Value Stack (Vals)</div>
+                                        <div id="values-stack-visualizer" class="stack-visualizer">
+                                            <span class="stack-empty">Empty</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Explanation for current step -->
+                                <div id="step-description" class="step-description-box">
+                                    No expression loaded. Enter one above and click Load.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Pane: Code Editor and Test Case Logs -->
+            <div class="code-pane">
+                <div class="editor-header">
+                    <div class="editor-title">
+                        <span class="editor-title-icon">&lt;/&gt;</span>
+                        <span class="editor-language-badge">Python 3</span>
+                    </div>
+                    <!-- Countdown Timer Widget -->
+                    <div class="editor-timer" id="editor-timer-widget">
+                        <span class="timer-icon">⏱️</span>
+                        <span id="timer-display">60:00</span>
+                        <button id="btn-timer-toggle" class="timer-ctrl-btn">Start</button>
+                    </div>
+                    <div class="editor-actions">
+                        <button id="btn-reset" class="editor-btn" title="Reset starter code">Reset</button>
+                        <button id="btn-run" class="editor-btn run">Run Code</button>
+                        <button id="btn-submit" class="editor-btn submit">Submit Code</button>
+                    </div>
+                </div>
+
+                <!-- Monaco Editor container -->
+                <div id="editor-container" class="editor-container"></div>
+
+                <!-- Console / Testcase results panel -->
+                <div class="console-panel">
+                    <div class="console-header">
+                        <span class="console-title">Test Results Console</span>
+                    </div>
+                    <div id="console-content" class="console-content">
+                        <!-- Loaded dynamically when running user's solution -->
+                        <div class="console-placeholder">Press Run Code to see execution results</div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Success Modal Overlay -->
+    <div id="success-modal-overlay" class="modal-overlay">
+        <div class="success-modal">
+            <div class="success-icon">🏆</div>
+            <h3 class="success-title">Challenge Complete!</h3>
+            <p class="success-message">Excellent work! Your solution passed all test cases successfully and has been submitted.</p>
+            
+            <div class="followup-section" id="followup-section" style="display: none; text-align: left; margin: 1.5rem 0; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--primary); border-radius: 4px;">
+                <h4 style="color: var(--text-main); margin-bottom: 0.5rem; font-size: 1rem;">💡 Follow-up Questions to Consider:</h4>
+                <ul id="followup-list" style="margin-left: 1.25rem; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                    <!-- Loaded dynamically -->
+                </ul>
+            </div>
+            
+            <button id="btn-modal-close" class="btn-modal-close">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Add Custom Problem Modal Overlay -->
+    <div id="custom-problem-overlay" class="modal-overlay">
+        <div class="success-modal" style="max-width: 600px; text-align: left;">
+            <h3 class="success-title" style="text-align: center; margin-bottom: 1.5rem;">Create Custom LeetCode Question</h3>
+            <form id="custom-problem-form" class="custom-problem-form">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cp-title">Title</label>
+                        <input type="text" id="cp-title" placeholder="e.g. 15. 3Sum" required>
+                    </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="cp-difficulty">Difficulty</label>
+                        <select id="cp-difficulty">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cp-category">Category</label>
+                        <select id="cp-category">
+                            <option value="Arrays & Hashing">Arrays & Hashing</option>
+                            <option value="Stack & Parsers">Stack & Parsers</option>
+                            <option value="Sliding Window">Sliding Window</option>
+                            <option value="Dynamic Programming">Dynamic Programming</option>
+                            <option value="Trees">Trees</option>
+                            <option value="Strings">Strings</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="cp-link">LeetCode Link</label>
+                        <input type="url" id="cp-link" placeholder="https://leetcode.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label for="cp-entry">Entry Function Name</label>
+                        <input type="text" id="cp-entry" placeholder="e.g. threeSum" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cp-desc">Description (HTML supported)</label>
+                        <textarea id="cp-desc" rows="4" placeholder="Describe the question, constraints and inputs here..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cp-starter-py">Python Starter Code</label>
+                        <textarea id="cp-starter-py" rows="4" placeholder="def threeSum(nums: List[int]) -> List[List[int]]:&#10;    # Write your code here&#10;    pass" required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cp-testcases">Test Cases (JSON array of {input, expected})</label>
+                        <textarea id="cp-testcases" rows="4" placeholder='[&#10;  { "input": "[[-1,0,1,2,-1,-4]]", "expected": [[-1,-1,2],[-1,0,1]] }&#10;]' required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cp-explanation">Approach/Explanation (HTML supported, optional)</label>
+                        <textarea id="cp-explanation" rows="3" placeholder="Brief hint or explanation of the approach..."></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" id="btn-cp-cancel" class="btn-modal-close" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: white;">Cancel</button>
+                    <button type="submit" class="btn-modal-close">Save Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application scripts -->
+    <script src="problems.js"></script>
+    <script src="visualizer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
