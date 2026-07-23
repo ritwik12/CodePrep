@@ -69,11 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setupTimer();
     setupChecklist();
     setupNotes();
-    setupRoadmapTabs();
     
     // Render initial views
     renderDashboard();
-    renderRoadmap();
     
     // Warm up Monaco and Pyodide
     initMonaco();
@@ -109,55 +107,38 @@ function initMonaco() {
 // Setup View Switching Navigation
 function setupNavigation() {
     const btnDashboard = document.getElementById("tab-nav-dashboard");
-    const btnRoadmap = document.getElementById("tab-nav-roadmap");
     const btnBack = document.getElementById("btn-back");
 
-    btnDashboard.addEventListener("click", () => {
-        switchView("dashboard");
-    });
+    if (btnDashboard) {
+        btnDashboard.addEventListener("click", () => {
+            switchView("dashboard");
+        });
+    }
 
-    btnRoadmap.addEventListener("click", () => {
-        switchView("roadmap");
-    });
-
-    btnBack.addEventListener("click", () => {
-        pauseTimer();
-        isMockMode = false;
-        switchView(lastActiveView);
-    });
+    if (btnBack) {
+        btnBack.addEventListener("click", () => {
+            pauseTimer();
+            isMockMode = false;
+            switchView("dashboard");
+        });
+    }
 }
 
 function switchView(viewName) {
     activeView = viewName;
-    const headerTabs = document.getElementById("header-tabs");
     const btnBack = document.getElementById("btn-back");
 
     // Hide all views
     document.getElementById("dashboard-view").style.display = "none";
-    document.getElementById("roadmap-view").style.display = "none";
     document.getElementById("workspace-view").style.display = "none";
-
-    // Deactivate header tabs
-    document.getElementById("tab-nav-dashboard").classList.remove("active");
-    document.getElementById("tab-nav-roadmap").classList.remove("active");
 
     if (viewName === "dashboard") {
         document.getElementById("dashboard-view").style.display = "block";
-        document.getElementById("tab-nav-dashboard").classList.add("active");
-        headerTabs.style.display = "flex";
         btnBack.style.display = "none";
         lastActiveView = "dashboard";
         renderDashboard();
-    } else if (viewName === "roadmap") {
-        document.getElementById("roadmap-view").style.display = "block";
-        document.getElementById("tab-nav-roadmap").classList.add("active");
-        headerTabs.style.display = "flex";
-        btnBack.style.display = "none";
-        lastActiveView = "roadmap";
-        renderRoadmap();
     } else if (viewName === "workspace") {
         document.getElementById("workspace-view").style.display = "grid";
-        headerTabs.style.display = "none";
         btnBack.style.display = "block";
     }
 }
@@ -199,8 +180,45 @@ function setupEventListeners() {
 
     // Filters & Search
     document.getElementById("search-input").addEventListener("input", renderDashboard);
-    document.getElementById("filter-category").addEventListener("change", renderDashboard);
+    document.getElementById("filter-category").addEventListener("change", () => {
+        const val = document.getElementById("filter-category").value;
+        if (val === "favourites") {
+            document.getElementById("pill-all").classList.remove("active");
+            document.getElementById("pill-fav").classList.add("active");
+        } else {
+            document.getElementById("pill-all").classList.add("active");
+            document.getElementById("pill-fav").classList.remove("active");
+        }
+        renderDashboard();
+    });
     document.getElementById("filter-difficulty").addEventListener("change", renderDashboard);
+
+    const pillAll = document.getElementById("pill-all");
+    const pillFav = document.getElementById("pill-fav");
+    if (pillAll && pillFav) {
+        pillAll.addEventListener("click", () => {
+            pillAll.classList.add("active");
+            pillFav.classList.remove("active");
+            document.getElementById("filter-category").value = "all";
+            renderDashboard();
+        });
+        pillFav.addEventListener("click", () => {
+            pillFav.classList.add("active");
+            pillAll.classList.remove("active");
+            document.getElementById("filter-category").value = "favourites";
+            renderDashboard();
+        });
+    }
+
+    const btnStarWorkspace = document.getElementById("btn-star-workspace");
+    if (btnStarWorkspace) {
+        btnStarWorkspace.addEventListener("click", () => {
+            if (!currentProblem) return;
+            window.toggleFavorite(currentProblem.id);
+            updateWorkspaceStarBtn();
+            renderDashboard();
+        });
+    }
 
     // Custom problem triggers
     document.getElementById("btn-add-problem").addEventListener("click", () => {
@@ -419,10 +437,35 @@ function setupRoadmapTabs() {
     document.getElementById("btn-random-mock").addEventListener("click", startRandomMockInterview);
 }
 
+// Update workspace star button appearance
+function updateWorkspaceStarBtn() {
+    if (!currentProblem) return;
+    const isFav = window.isFavorite(currentProblem.id);
+    const btn = document.getElementById("btn-star-workspace");
+    const icon = document.getElementById("star-icon-workspace");
+    const text = document.getElementById("star-text-workspace");
+    if (btn && icon && text) {
+        if (isFav) {
+            btn.classList.add("active");
+            icon.innerText = "★";
+            text.innerText = "Favourited";
+        } else {
+            btn.classList.remove("active");
+            icon.innerText = "☆";
+            text.innerText = "Favourite";
+        }
+    }
+}
+
 // Render Dashboard View
 function renderDashboard() {
     const grid = document.getElementById("problems-grid");
     grid.innerHTML = "";
+
+    const allCountEl = document.getElementById("count-all");
+    const favCountEl = document.getElementById("count-fav");
+    if (allCountEl) allCountEl.innerText = window.problems.length;
+    if (favCountEl) favCountEl.innerText = window.getFavorites().length;
 
     const query = document.getElementById("search-input").value.toLowerCase().trim();
     const category = document.getElementById("filter-category").value;
@@ -430,13 +473,24 @@ function renderDashboard() {
 
     const filtered = window.problems.filter(p => {
         const matchesQuery = p.title.toLowerCase().includes(query) || p.description.toLowerCase().includes(query);
-        const matchesCategory = category === "all" || p.category === category;
+        const matchesCategory = category === "all" ? true :
+                                category === "favourites" ? window.isFavorite(p.id) :
+                                p.category === category;
         const matchesDifficulty = difficulty === "all" || p.difficulty.toLowerCase() === difficulty.toLowerCase();
         return matchesQuery && matchesCategory && matchesDifficulty;
     });
 
     if (filtered.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No problems match your filters. Try adjusting them or add a new question!</div>`;
+        if (category === "favourites") {
+            grid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 4rem 2rem; background: rgba(15, 23, 42, 0.3); border-radius: 16px; border: 1px dashed var(--border-color);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⭐</div>
+                    <h3 style="color: var(--text-main); margin-bottom: 0.5rem; font-weight: 600;">No Favourite Questions Yet</h3>
+                    <p style="font-size: 0.95rem; max-width: 450px; margin: 0 auto; line-height: 1.6;">Click the star icon (<strong style="color: #fbbf24;">☆</strong>) on any question card to save it to your favourites list for quick practice!</p>
+                </div>`;
+        } else {
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No problems match your filters. Try adjusting them or add a new question!</div>`;
+        }
         return;
     }
 
@@ -452,6 +506,8 @@ function renderDashboard() {
             statusClass = "attempted";
         }
 
+        const isFav = window.isFavorite(p.id);
+
         // Generate company badges HTML
         let companyHTML = "";
         if (p.companyTags) {
@@ -462,8 +518,13 @@ function renderDashboard() {
         card.className = "problem-card";
         card.innerHTML = `
             <div class="problem-card-header">
-                <div>
-                    <div class="problem-title">${p.title}</div>
+                <div style="flex-grow: 1; padding-right: 0.5rem;">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;">
+                        <div class="problem-title">${p.title}</div>
+                        <button class="btn-star ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from Favourites' : 'Add to Favourites'}">
+                            ${isFav ? '★' : '☆'}
+                        </button>
+                    </div>
                     <div style="font-size: 0.75rem; color: var(--secondary); margin-top: 0.25rem;">${p.category || 'Algorithms'}</div>
                 </div>
                 <span class="difficulty-badge ${p.difficulty.toLowerCase()}">${p.difficulty}</span>
@@ -476,6 +537,18 @@ function renderDashboard() {
                 <button class="btn-solve">Solve</button>
             </div>
         `;
+
+        const starBtn = card.querySelector(".btn-star");
+        if (starBtn) {
+            starBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                window.toggleFavorite(p.id);
+                renderDashboard();
+                if (currentProblem && currentProblem.id === p.id) {
+                    updateWorkspaceStarBtn();
+                }
+            });
+        }
 
         card.addEventListener("click", () => showWorkspaceView(p.id));
         grid.appendChild(card);
@@ -578,6 +651,9 @@ function showWorkspaceView(problemId) {
     document.getElementById("problem-desc-container").innerHTML = currentProblem.description;
     document.getElementById("explanation-content").innerHTML = currentProblem.explanation;
 
+    // Update workspace star button
+    updateWorkspaceStarBtn();
+
     // Load workspace state
     loadProblemCode(currentProblem);
     loadChecklistState(currentProblem.id);
@@ -666,9 +742,39 @@ async function runCode(isSubmit = false) {
         pyodide.globals.set("class_name_str", currentProblem.className || "");
 
         // Inject helper code templates inside the runner script based on problem parameters
-        let helpersSnippet = "";
+        let helpersSnippet = `
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def build_tree(arr):
+    if not arr: return None
+    root = TreeNode(arr[0])
+    queue = [root]
+    i = 1
+    while queue and i < len(arr):
+        curr = queue.pop(0)
+        if i < len(arr) and arr[i] is not None:
+            curr.left = TreeNode(arr[i])
+            queue.append(curr.left)
+        i += 1
+        if i < len(arr) and arr[i] is not None:
+            curr.right = TreeNode(arr[i])
+            queue.append(curr.right)
+        i += 1
+    return root
+
+def find_tree_node(root, val):
+    if not root: return None
+    if root.val == val: return root
+    return find_tree_node(root.left, val) or find_tree_node(root.right, val)
+
+globals()['TreeNode'] = TreeNode
+`;
         if (currentProblem.id === "clone-graph") {
-            helpersSnippet = `
+            helpersSnippet += `
 class Node:
     def __init__(self, val = 0, neighbors = None):
         self.val = val
@@ -692,11 +798,10 @@ def graph_to_adj(node):
     dfs(node)
     return [visited[k] for k in sorted(visited.keys())]
 
-# Override target logic in exec environment
 globals()['Node'] = Node
 `;
         } else if (currentProblem.id === "mini-parser") {
-            helpersSnippet = `
+            helpersSnippet += `
 class NestedInteger:
     def __init__(self, value=None):
         if value is not None:
@@ -740,7 +845,7 @@ import bisect
 
 sys.stdout = io.StringIO()
 
-# __HELPERS_SNIPPET_PLACEHOLDER__
+${helpersSnippet}
 
 try:
     exec(user_code, globals())
@@ -768,8 +873,12 @@ else:
             
         try:
             if is_class_design:
-                commands = parsed_input["commands"]
-                arguments = parsed_input["arguments"]
+                if isinstance(parsed_input, list) and len(parsed_input) == 2 and isinstance(parsed_input[0], list):
+                    commands = parsed_input[0]
+                    arguments = parsed_input[1]
+                else:
+                    commands = parsed_input["commands"]
+                    arguments = parsed_input["arguments"]
                 obj = None
                 outputs = []
                 
@@ -807,23 +916,31 @@ else:
                 if func is None:
                     raise Exception(f"Function or method '{entry_point_name}' not found.")
                 
-                # Check for helper wrappers
-                if "__PROBLEM_ID_PLACEHOLDER__" == "clone-graph":
-                    # Build graph Node elements from input adjacency list
+                curr_id = "${currentProblem.id}"
+                if curr_id == "clone-graph":
                     root_node = build_graph(parsed_input)
                     cloned_root = func(root_node)
                     actual_output = graph_to_adj(cloned_root)
-                elif "__PROBLEM_ID_PLACEHOLDER__" == "mini-parser":
+                elif curr_id == "mini-parser":
                     arg = parsed_input[0] if isinstance(parsed_input, list) and len(parsed_input) == 1 else parsed_input
                     res_ni = func(arg)
                     actual_output = serialize_nested(res_ni)
+                elif curr_id == "walls-and-gates":
+                    rooms = parsed_input[0] if isinstance(parsed_input, list) and len(parsed_input) == 1 else parsed_input
+                    func(rooms)
+                    actual_output = rooms
+                elif curr_id == "lowest-common-ancestor-of-a-binary-tree":
+                    root = build_tree(parsed_input[0])
+                    p = find_tree_node(root, parsed_input[1])
+                    q = find_tree_node(root, parsed_input[2])
+                    res_node = func(root, p, q)
+                    actual_output = res_node.val if res_node else None
                 else:
                     if isinstance(parsed_input, list):
                         import inspect
                         try:
                             params = inspect.signature(func).parameters
                             has_var_positional = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params.values())
-                            # Unpack if list length matches parameter count
                             if len(parsed_input) == len(params) or has_var_positional:
                                 actual_output = func(*parsed_input)
                             else:

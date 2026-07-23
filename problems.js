@@ -1212,8 +1212,738 @@ class Solution:
       "What is the worst-case space complexity of your stack parser?",
       "How would you write a serializer function that outputs the string back?"
     ]
+  },
+  {
+    id: "detonate-the-maximum-bombs",
+    title: "2101. Detonate the Maximum Bombs",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/detonate-the-maximum-bombs/",
+    entryPoint: "maximumDetonation",
+    companyTags: ["Google", "Amazon", "Meta"],
+    description: `
+      <p>You are given a list of bombs. The locations of the bombs are represented by a 0-indexed 2D integer array <code>bombs</code> where <code>bombs[i] = [xi, yi, ri]</code>. <code>xi</code> and <code>yi</code> denote the X-coordinate and Y-coordinate of the <code>i<sup>th</sup></code> bomb, and <code>ri</code> denotes the <strong>radius</strong> of its blast.</p>
+      <p>You may choose to detonate a <strong>single</strong> bomb. When a bomb detonates, it will detonate <strong>all bombs</strong> that lie in its area of effect. These bombs will then detonate the bombs in their areas of effect, and so on.</p>
+      <p>Return <em>the <strong>maximum</strong> number of bombs that can be detonated if you trigger just <strong>one</strong> bomb</em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> bombs = [[2,1,3],[6,1,4]]\n<strong>Output:</strong> 2\n<strong>Explanation:</strong> Bomb 0 at (2,1) with radius 3 reaches bomb 1 at (6,1) distance 4.</pre>
+      
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> bombs = [[1,1,5],[10,10,5]]\n<strong>Output:</strong> 1\n<strong>Explanation:</strong> Neither bomb can reach the other.</pre>
+
+      <h5>Example 3:</h5>
+      <pre><strong>Input:</strong> bombs = [[1,2,3],[2,3,1],[3,4,2],[4,5,3],[5,6,4]]\n<strong>Output:</strong> 5</pre>
+      
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= bombs.length <= 100</code></li>
+        <li><code>bombs[i].length == 3</code></li>
+        <li><code>1 <= xi, yi, ri <= 10<sup>5</sup></code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def maximumDetonation(self, bombs: List[List[int]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[[2,1,3],[6,1,4]]]', expected: 2 },
+      { input: '[[[1,1,5],[10,10,5]]]', expected: 1 },
+      { input: '[[[1,2,3],[2,3,1],[3,4,2],[4,5,3],[5,6,4]]]', expected: 5 }
+    ],
+    explanation: `
+      <h4>Directed Graph BFS / DFS</h4>
+      <p>Construct a directed graph where directed edge <code>u -> v</code> exists if the Euclidean distance <code>(x1-x2)^2 + (y1-y2)^2 <= r1^2</code>. Perform BFS or DFS starting from each bomb node to find the maximum reachable component size.</p>
+    `,
+    followUps: [
+      "Why is the graph directed instead of undirected?",
+      "What is the time complexity of building the adjacency graph vs traversing it?"
+    ]
+  },
+  {
+    id: "minesweeper",
+    title: "529. Minesweeper",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/minesweeper/",
+    entryPoint: "updateBoard",
+    companyTags: ["Amazon", "Uber", "Microsoft"],
+    description: `
+      <p>Let's play the minesweeper game!</p>
+      <p>You are given an <code>m x n</code> char matrix <code>board</code> representing the game board where:</p>
+      <ul>
+        <li><code>'M'</code> represents an unrevealed mine,</li>
+        <li><code>'E'</code> represents an unrevealed empty square,</li>
+        <li><code>'B'</code> represents a revealed blank square that has no adjacent mines (in 8 directions),</li>
+        <li>digit (<code>'1'</code> to <code>'8'</code>) represents how many mines are adjacent to this revealed square,</li>
+        <li><code>'X'</code> represents a revealed mine.</li>
+      </ul>
+      <p>You are also given an array <code>click = [r, c]</code> representing the click position among all unrevealed squares (<code>'M'</code> or <code>'E'</code>).</p>
+      <p>Return <em>the board after revealing this position according to Minesweeper rules</em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> board = [["E","E","E","E","E"],["E","E","M","E","E"],["E","E","E","E","E"],["E","E","E","E","E"]], click = [3,0]\n<strong>Output:</strong> [["B","1","E","1","B"],["B","1","M","1","B"],["B","1","1","1","B"],["B","B","B","B","B"]]</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> board = [["B","1","E","1","B"],["B","1","M","1","B"],["B","1","1","1","B"],["B","B","B","B","B"]], click = [1,2]\n<strong>Output:</strong> [["B","1","E","1","B"],["B","1","X","1","B"],["B","1","1","1","B"],["B","B","B","B","B"]]</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>m == board.length</code>, <code>n == board[i].length</code></li>
+        <li><code>1 <= m, n <= 50</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def updateBoard(self, board: List[List[str]], click: List[int]) -> List[List[str]]:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[ [["E","E","E","E","E"],["E","E","M","E","E"],["E","E","E","E","E"],["E","E","E","E","E"]], [3,0] ]', expected: [["B","1","E","1","B"],["B","1","M","1","B"],["B","1","1","1","B"],["B","B","B","B","B"]] },
+      { input: '[ [["B","1","E","1","B"],["B","1","M","1","B"],["B","1","1","1","B"],["B","B","B","B","B"]], [1,2] ]', expected: [["B","1","E","1","B"],["B","1","X","1","B"],["B","1","1","1","B"],["B","B","B","B","B"]] }
+    ],
+    explanation: `
+      <h4>Grid BFS / DFS Traversal</h4>
+      <p>If click position is <code>'M'</code>, set to <code>'X'</code> and return. Otherwise count adjacent mines in 8 directions. If count &gt; 0, set to <code>str(count)</code>. If count == 0, set to <code>'B'</code> and recursively visit unrevealed <code>'E'</code> neighbors.</p>
+    `,
+    followUps: [
+      "How does BFS compare with DFS for Minesweeper in terms of call stack depth?"
+    ]
+  },
+  {
+    id: "number-of-provinces",
+    title: "547. Number of Provinces",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/number-of-provinces/",
+    entryPoint: "findCircleNum",
+    companyTags: ["Google", "Amazon", "Meta", "Microsoft"],
+    description: `
+      <p>There are <code>n</code> cities. Some of them are connected directly or indirectly. A <strong>province</strong> is a group of directly or indirectly connected cities.</p>
+      <p>You are given an <code>n x n</code> matrix <code>isConnected</code> where <code>isConnected[i][j] = 1</code> if the <code>i<sup>th</sup></code> city and the <code>j<sup>th</sup></code> city are directly connected.</p>
+      <p>Return <em>the total number of <strong>provinces</strong></em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> isConnected = [[1,1,0],[1,1,0],[0,0,1]]\n<strong>Output:</strong> 2</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> isConnected = [[1,0,0],[0,1,0],[0,0,1]]\n<strong>Output:</strong> 3</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= n <= 200</code></li>
+        <li><code>isConnected[i][j]</code> is <code>1</code> or <code>0</code>.</li>
+        <li><code>isConnected[i][i] == 1</code></li>
+        <li><code>isConnected[i][j] == isConnected[j][i]</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[[1,1,0],[1,1,0],[0,0,1]]]', expected: 2 },
+      { input: '[[[1,0,0],[0,1,0],[0,0,1]]]', expected: 3 }
+    ],
+    explanation: `
+      <h4>Connected Components (DFS / BFS / Union-Find)</h4>
+      <p>Iterate over all cities <code>0..n-1</code> with a visited set. Whenever an unvisited city is encountered, increment province count and launch DFS/BFS to visit all connected cities.</p>
+    `,
+    followUps: [
+      "How would Union-Find (Disjoint Set Union) compare with DFS in performance?"
+    ]
+  },
+  {
+    id: "max-area-of-island",
+    title: "695. Max Area of Island",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/max-area-of-island/",
+    entryPoint: "maxAreaOfIsland",
+    companyTags: ["Amazon", "Google", "Meta"],
+    description: `
+      <p>You are given an <code>m x n</code> binary matrix <code>grid</code>. An island is a group of <code>1</code>'s (representing land) connected <strong>4-directionally</strong>.</p>
+      <p>The <strong>area</strong> of an island is the number of cells with a value <code>1</code> in the island.</p>
+      <p>Return <em>the maximum <strong>area</strong> of an island in </em><code>grid</code>. If there is no island, return <code>0</code>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> grid = [[0,0,1,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,1,1,0,1,0,0,0,0,0,0,0,0],[0,1,0,0,1,1,0,0,1,0,1,0,0],[0,1,0,0,1,1,0,0,1,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,1,1,0,0,0,0]]\n<strong>Output:</strong> 6</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> grid = [[0,0,0,0,0,0,0,0]]\n<strong>Output:</strong> 0</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>m == grid.length</code>, <code>n == grid[i].length</code></li>
+        <li><code>1 <= m, n <= 50</code></li>
+        <li><code>grid[i][j]</code> is <code>0</code> or <code>1</code>.</li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[[0,0,1,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,1,1,0,1,0,0,0,0,0,0,0,0],[0,1,0,0,1,1,0,0,1,0,1,0,0],[0,1,0,0,1,1,0,0,1,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,1,1,0,0,0,0]]]', expected: 6 },
+      { input: '[[[0,0,0,0,0,0,0,0]]]', expected: 0 }
+    ],
+    explanation: `
+      <h4>Grid Connected Component Area</h4>
+      <p>Traverse each cell in the grid. If a cell contains <code>1</code>, launch BFS/DFS to visit all 4-directionally connected <code>1</code>s, sink land to <code>0</code>, and count island size. Maintain max area across grid.</p>
+    `,
+    followUps: [
+      "How can we avoid mutating the input grid matrix?"
+    ]
+  },
+  {
+    id: "rotting-oranges",
+    title: "994. Rotting Oranges",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/rotting-oranges/",
+    entryPoint: "orangesRotting",
+    companyTags: ["Amazon", "Google", "Microsoft", "Meta"],
+    description: `
+      <p>You are given an <code>m x n</code> grid where each cell can have one of three values:</p>
+      <ul>
+        <li><code>0</code> representing an empty cell,</li>
+        <li><code>1</code> representing a fresh orange, or</li>
+        <li><code>2</code> representing a rotten orange.</li>
+      </ul>
+      <p>Every minute, any fresh orange that is <strong>4-directionally adjacent</strong> to a rotten orange becomes rotten.</p>
+      <p>Return <em>the minimum number of minutes that must elapse until no cell has a fresh orange</em>. If <em>this is impossible, return <code>-1</code></em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> grid = [[2,1,1],[1,1,0],[0,1,1]]\n<strong>Output:</strong> 4</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> grid = [[2,1,1],[0,1,1],[1,0,1]]\n<strong>Output:</strong> -1\n<strong>Explanation:</strong> Bottom-left orange cannot be reached.</pre>
+
+      <h5>Example 3:</h5>
+      <pre><strong>Input:</strong> grid = [[0,2]]\n<strong>Output:</strong> 0</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>m == grid.length</code>, <code>n == grid[i].length</code></li>
+        <li><code>1 <= m, n <= 10</code></li>
+        <li><code>grid[i][j]</code> is <code>0</code>, <code>1</code>, or <code>2</code>.</li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[[2,1,1],[1,1,0],[0,1,1]]]', expected: 4 },
+      { input: '[[[2,1,1],[0,1,1],[1,0,1]]]', expected: -1 },
+      { input: '[[[0,2]]]', expected: 0 }
+    ],
+    explanation: `
+      <h4>Multi-Source BFS</h4>
+      <p>Enqueue all initial rotten oranges (<code>2</code>) and count fresh oranges (<code>1</code>). Run level-by-level BFS. Increment minute elapsed per level. If fresh count reaches 0, return elapsed minutes, otherwise return -1.</p>
+    `,
+    followUps: [
+      "Why is BFS required instead of DFS for shortest-time multi-source propagation?"
+    ]
+  },
+  {
+    id: "walls-and-gates",
+    title: "286. Walls and Gates",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/walls-and-gates/",
+    entryPoint: "wallsAndGates",
+    companyTags: ["Google", "Meta", "Amazon"],
+    description: `
+      <p>You are given an <code>m x n</code> grid <code>rooms</code> initialized with these three possible values:</p>
+      <ul>
+        <li><code>-1</code> represents a wall or an obstacle.</li>
+        <li><code>0</code> represents a gate.</li>
+        <li><code>INF = 2147483647</code> represents an empty room.</li>
+      </ul>
+      <p>Fill each empty room with the distance to its nearest gate. If it is impossible to reach a gate, it should be filled with <code>INF</code>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> rooms = [[2147483647,-1,0,2147483647],[2147483647,2147483647,2147483647,-1],[2147483647,-1,2147483647,-1],[0,-1,2147483647,2147483647]]\n<strong>Output:</strong> [[3,-1,0,1],[2,2,1,-1],[1,-1,2,-1],[0,-1,3,4]]</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>m == rooms.length</code>, <code>n == rooms[i].length</code></li>
+        <li><code>1 <= m, n <= 250</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def wallsAndGates(self, rooms: List[List[int]]) -> None:
+        """
+        Do not return anything, modify rooms in-place instead.
+        """
+        pass`,
+    testCases: [
+      { input: '[[[2147483647,-1,0,2147483647],[2147483647,2147483647,2147483647,-1],[2147483647,-1,2147483647,-1],[0,-1,2147483647,2147483647]]]', expected: [[3,-1,0,1],[2,2,1,-1],[1,-1,2,-1],[0,-1,3,4]] }
+    ],
+    explanation: `
+      <h4>Multi-Source BFS</h4>
+      <p>Push all gate coordinates <code>(r, c)</code> into a queue. Perform BFS simultaneously from all gates, filling empty rooms with their shortest distance level by level.</p>
+    `,
+    followUps: [
+      "Why is multi-source BFS better than running BFS from each empty room independently?"
+    ]
+  },
+  {
+    id: "battleships-in-a-board",
+    title: "419. Battleships in a Board",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/battleships-in-a-board/",
+    entryPoint: "countBattleships",
+    companyTags: ["Microsoft", "Google"],
+    description: `
+      <p>Given an <code>m x n</code> matrix <code>board</code> where each cell is a battleship <code>'X'</code> or empty <code>'.'</code>, return <em>the number of the <strong>battleships</strong> on <code>board</code></em>.</p>
+      <p>Battleships can only be placed horizontally or vertically on <code>board</code>. Battleships cannot overlap or be adjacent to each other.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> board = [["X",".",".","X"],[".",".",".","X"],[".",".",".","X"]]\n<strong>Output:</strong> 2</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>m == board.length</code>, <code>n == board[i].length</code></li>
+        <li><code>1 <= m, n <= 200</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def countBattleships(self, board: List[List[str]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[ [["X",".",".","X"],[".",".",".","X"],[".",".",".","X"]] ]', expected: 2 },
+      { input: '[ [["."]] ]', expected: 0 }
+    ],
+    explanation: `
+      <h4>One-Pass O(1) Extra Space Counting</h4>
+      <p>Count top-left corner cells of each battleship. A cell <code>(r, c) == 'X'</code> is a head if <code>r == 0</code> or <code>board[r-1][c] == '.'</code> AND <code>c == 0</code> or <code>board[r][c-1] == '.'</code>.</p>
+    `,
+    followUps: [
+      "Can you solve this in O(1) memory without mutating the input matrix?"
+    ]
+  },
+  {
+    id: "escape-the-spreading-fire",
+    title: "2258. Escape the Spreading Fire",
+    difficulty: "Hard",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/escape-the-spreading-fire/",
+    entryPoint: "maximumMinutes",
+    companyTags: ["Google", "Amazon"],
+    description: `
+      <p>You are given a 0-indexed 2D integer array <code>grid</code> where <code>0</code> represents grass, <code>1</code> fire, and <code>2</code> a wall. Every minute fire spreads to 4-directionally adjacent grass cells. You start at <code>(0,0)</code> and want to reach <code>(m-1, n-1)</code> safely.</p>
+      <p>Return <em>the maximum number of minutes you can stay at <code>(0,0)</code> before moving and still reach the destination</em>. Return <code>10<sup>9</sup></code> if safe indefinitely, or <code>-1</code> if impossible.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> grid = [[0,2,0,0,0,0,0],[0,0,0,2,2,1,0],[0,2,0,0,1,0,0],[0,0,0,0,2,2,0],[0,0,0,0,0,0,0]]\n<strong>Output:</strong> 3</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>m == grid.length</code>, <code>n == grid[i].length</code></li>
+        <li><code>2 <= m, n <= 300</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def maximumMinutes(self, grid: List[List[int]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[[0,2,0,0,0,0,0],[0,0,0,2,2,1,0],[0,2,0,0,1,0,0],[0,0,0,0,2,2,0],[0,0,0,0,0,0,0]]]', expected: 3 }
+    ],
+    explanation: `
+      <h4>Multi-Source BFS + Binary Search</h4>
+      <p>1. Run Multi-Source BFS to compute fire arrival time for every cell.</p>
+      <p>2. Binary Search or compute human arrival time to check if destination can be reached before fire arrives.</p>
+    `,
+    followUps: [
+      "What is the edge case when both human and fire reach the bottom-right safehouse at the exact same minute?"
+    ]
+  },
+  {
+    id: "number-of-connected-components-in-an-undirected-graph",
+    title: "323. Number of Connected Components in an Undirected Graph",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/",
+    entryPoint: "countComponents",
+    companyTags: ["Amazon", "Google", "Meta", "LinkedIn"],
+    description: `
+      <p>You have a graph of <code>n</code> nodes. You are given an integer <code>n</code> and an array <code>edges</code> where <code>edges[i] = [ai, bi]</code> indicates that there is an edge between <code>ai</code> and <code>bi</code> in the graph.</p>
+      <p>Return <em>the number of connected components in the graph</em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> n = 5, edges = [[0,1],[1,2],[3,4]]\n<strong>Output:</strong> 2</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> n = 5, edges = [[0,1],[1,2],[2,3],[3,4]]\n<strong>Output:</strong> 1</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= n <= 2000</code></li>
+        <li><code>0 <= edges.length <= 5000</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def countComponents(self, n: int, edges: List[List[int]]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[5, [[0,1],[1,2],[3,4]]]', expected: 2 },
+      { input: '[5, [[0,1],[1,2],[2,3],[3,4]]]', expected: 1 }
+    ],
+    explanation: `
+      <h4>Union-Find (DSU) or BFS/DFS</h4>
+      <p>Initialize DSU with <code>n</code> components. For each edge <code>(u, v)</code>, union the sets. If union succeeds, decrement component count.</p>
+    `,
+    followUps: [
+      "Compare space & time complexity of Union-Find with Path Compression vs BFS graph traversal."
+    ]
+  },
+  {
+    id: "word-ladder",
+    title: "127. Word Ladder",
+    difficulty: "Hard",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/word-ladder/",
+    entryPoint: "ladderLength",
+    companyTags: ["Amazon", "Google", "Meta", "Microsoft"],
+    description: `
+      <p>A <strong>transformation sequence</strong> from word <code>beginWord</code> to word <code>endWord</code> using a dictionary <code>wordList</code> is a sequence of words <code>beginWord -> s1 -> s2 -> ... -> sk</code> such that every adjacent pair differs by single letter and <code>sk == endWord</code>.</p>
+      <p>Given <code>beginWord</code>, <code>endWord</code>, and <code>wordList</code>, return <em>the <strong>number of words</strong> in the shortest transformation sequence, or <code>0</code> if no sequence exists</em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]\n<strong>Output:</strong> 5\n<strong>Explanation:</strong> "hit" -> "hot" -> "dot" -> "dog" -> "cog".</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log"]\n<strong>Output:</strong> 0</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= beginWord.length <= 10</code></li>
+        <li><code>1 <= wordList.length <= 5000</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '["hit", "cog", ["hot","dot","dog","lot","log","cog"]]', expected: 5 },
+      { input: '["hit", "cog", ["hot","dot","dog","lot","log"]]', expected: 0 }
+    ],
+    explanation: `
+      <h4>Unweighted Shortest Path BFS</h4>
+      <p>Build wildcard pattern mapping (e.g. <code>*ot -> hot, dot, lot</code>). Perform BFS level-by-level starting from <code>beginWord</code> until reaching <code>endWord</code>.</p>
+    `,
+    followUps: [
+      "How can Bidirectional BFS optimize search space for long word ladders?"
+    ]
+  },
+  {
+    id: "redundant-connection",
+    title: "684. Redundant Connection",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/redundant-connection/",
+    entryPoint: "findRedundantConnection",
+    companyTags: ["Google", "Amazon", "Meta"],
+    description: `
+      <p>In this problem, a tree is an undirected graph that is connected and has no cycles.</p>
+      <p>You are given a graph that started as a tree with <code>n</code> nodes labeled from <code>1</code> to <code>n</code>, with one additional edge added.</p>
+      <p>Return <em>an edge that can be removed so that the resulting graph is a tree of <code>n</code> nodes</em>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> edges = [[1,2],[1,3],[2,3]]\n<strong>Output:</strong> [2,3]</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> edges = [[1,2],[2,3],[3,4],[1,4],[1,5]]\n<strong>Output:</strong> [1,4]</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>n == edges.length</code></li>
+        <li><code>3 <= n <= 1000</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[[1,2],[1,3],[2,3]]]', expected: [2,3] },
+      { input: '[[[1,2],[2,3],[3,4],[1,4],[1,5]]]', expected: [1,4] }
+    ],
+    explanation: `
+      <h4>Union-Find Cycle Detection</h4>
+      <p>Process edges sequentially in Disjoint Set Union (DSU). If <code>find(u) == find(v)</code>, edge <code>(u, v)</code> forms a cycle and is the redundant connection.</p>
+    `,
+    followUps: [
+      "Why does DSU find the exact edge causing the cycle in a single pass?"
+    ]
+  },
+  {
+    id: "accounts-merge",
+    title: "721. Accounts Merge",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "https://leetcode.com/problems/accounts-merge/",
+    entryPoint: "accountsMerge",
+    companyTags: ["Meta", "Google", "Amazon"],
+    description: `
+      <p>Given a list of <code>accounts</code> where <code>accounts[i][0]</code> is a name, and rest are emails.</p>
+      <p>Merge accounts that share common emails. Return accounts in format: name followed by sorted emails.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> accounts = [["John","johnsmith@mail.com","john_newyork@mail.com"],["John","johnsmith@mail.com","john00@mail.com"],["Mary","mary@mail.com"],["John","johnnybravo@mail.com"]]\n<strong>Output:</strong> [["John","john00@mail.com","john_newyork@mail.com","johnsmith@mail.com"],["Mary","mary@mail.com"],["John","johnnybravo@mail.com"]]</pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= accounts.length <= 1000</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[ [["John","johnsmith@mail.com","john_newyork@mail.com"],["John","johnsmith@mail.com","john00@mail.com"],["Mary","mary@mail.com"],["John","johnnybravo@mail.com"]] ]', expected: [["John","john00@mail.com","john_newyork@mail.com","johnsmith@mail.com"],["Mary","mary@mail.com"],["John","johnnybravo@mail.com"]] }
+    ],
+    explanation: `
+      <h4>Graph Component Search / DSU</h4>
+      <p>Connect first email of each account to all other emails in the same account. Use BFS/DFS or DSU to find connected components of emails, then pair with owner name.</p>
+    `,
+    followUps: [
+      "How do we handle two different people having the exact same name?"
+    ]
+  },
+  {
+    id: "implement-trie-prefix-tree",
+    title: "208. Implement Trie (Prefix Tree)",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "https://leetcode.com/problems/implement-trie-prefix-tree/",
+    entryPoint: "Trie",
+    isClassDesign: true,
+    className: "Trie",
+    companyTags: ["Google", "Amazon", "Meta", "Twitter"],
+    description: `
+      <p>Implement the <code>Trie</code> class:</p>
+      <ul>
+        <li><code>Trie()</code> Initializes the trie object.</li>
+        <li><code>void insert(String word)</code> Inserts string <code>word</code> into trie.</li>
+        <li><code>boolean search(String word)</code> Returns <code>true</code> if <code>word</code> is in trie.</li>
+        <li><code>boolean startsWith(String prefix)</code> Returns <code>true</code> if any inserted word starts with <code>prefix</code>.</li>
+      </ul>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input</strong>\n["Trie", "insert", "search", "search", "startsWith", "insert", "search"]\n[[], ["apple"], ["apple"], ["app"], ["app"], ["app"], ["app"]]\n<strong>Output</strong>\n[null, null, true, false, true, null, true]</pre>
+    `,
+    starterCode: `class Trie:
+    def __init__(self):
+        pass
+
+    def insert(self, word: str) -> None:
+        pass
+
+    def search(self, word: str) -> bool:
+        pass
+
+    def startsWith(self, prefix: str) -> bool:
+        pass`,
+    testCases: [
+      { input: '[["Trie", "insert", "search", "search", "startsWith", "insert", "search"], [[], ["apple"], ["apple"], ["app"], ["app"], ["app"], ["app"]]]', expected: [null, null, true, false, true, null, true] }
+    ],
+    explanation: `
+      <h4>Tree of Character Map Nodes</h4>
+      <p>Each <code>TrieNode</code> contains a dictionary <code>children</code> mapping characters to child nodes, and a boolean <code>is_end</code>.</p>
+    `,
+    followUps: [
+      "Compare memory footprint of Trie vs Hash Set for long dictionary lookups."
+    ]
+  },
+  {
+    id: "find-median-from-data-stream",
+    title: "295. Find Median from Data Stream",
+    difficulty: "Hard",
+    category: "Data Structure Design",
+    leetcodeLink: "https://leetcode.com/problems/find-median-from-data-stream/",
+    entryPoint: "MedianFinder",
+    isClassDesign: true,
+    className: "MedianFinder",
+    companyTags: ["Google", "Amazon", "Meta", "Apple"],
+    description: `
+      <p>Implement the <code>MedianFinder</code> class:</p>
+      <ul>
+        <li><code>MedianFinder()</code> initializes object.</li>
+        <li><code>void addNum(int num)</code> adds integer <code>num</code> from stream.</li>
+        <li><code>double findMedian()</code> returns median of all elements so far.</li>
+      </ul>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input</strong>\n["MedianFinder", "addNum", "addNum", "findMedian", "addNum", "findMedian"]\n[[], [1], [2], [], [3], []]\n<strong>Output</strong>\n[null, null, null, 1.5, null, 2.0]</pre>
+    `,
+    starterCode: `class MedianFinder:
+    def __init__(self):
+        pass
+
+    def addNum(self, num: int) -> None:
+        pass
+
+    def findMedian(self) -> float:
+        pass`,
+    testCases: [
+      { input: '[["MedianFinder", "addNum", "addNum", "findMedian", "addNum", "findMedian"], [[], [1], [2], [], [3], []]]', expected: [null, null, null, 1.5, null, 2.0] }
+    ],
+    explanation: `
+      <h4>Two Heaps (Max-Heap + Min-Heap)</h4>
+      <p>Maintain max-heap for lower half and min-heap for upper half. Balance sizes so max-heap has at most 1 extra element. Median is top of max-heap or average of both tops.</p>
+    `,
+    followUps: [
+      "If 99% of stream integers are between 0 and 100, how can bucket arrays optimize memory?"
+    ]
+  },
+  {
+    id: "lowest-common-ancestor-of-a-binary-tree",
+    title: "236. Lowest Common Ancestor of a Binary Tree",
+    difficulty: "Medium",
+    category: "Trees & Graphs",
+    leetcodeLink: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/",
+    entryPoint: "lowestCommonAncestor",
+    companyTags: ["Meta", "Amazon", "Google", "Microsoft"],
+    description: `
+      <p>Given a binary tree, find the lowest common ancestor (LCA) of two given nodes <code>p</code> and <code>q</code>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1\n<strong>Output:</strong> 3</pre>
+
+      <h5>Example 2:</h5>
+      <pre><strong>Input:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4\n<strong>Output:</strong> 5</pre>
+    `,
+    starterCode: `# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '[[3,5,1,6,2,0,8,null,null,7,4], 5, 1]', expected: 3 },
+      { input: '[[3,5,1,6,2,0,8,null,null,7,4], 5, 4]', expected: 5 }
+    ],
+    explanation: `
+      <h4>Post-Order Tree Traversal Recursion</h4>
+      <p>If current node is <code>None</code>, <code>p</code>, or <code>q</code>, return root. Recursively search left and right. If both return non-null, current node is LCA!</p>
+    `,
+    followUps: [
+      "How would the algorithm change if parent pointers were available on each node?"
+    ]
+  },
+  {
+    id: "serialize-and-deserialize-binary-tree",
+    title: "297. Serialize and Deserialize Binary Tree",
+    difficulty: "Hard",
+    category: "Trees & Graphs",
+    leetcodeLink: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
+    entryPoint: "Codec",
+    isClassDesign: true,
+    className: "Codec",
+    companyTags: ["Amazon", "Google", "Meta", "Microsoft"],
+    description: `
+      <p>Design an algorithm to serialize a binary tree to a string and deserialize the string back to the original tree structure.</p>
+      
+      <h5>Example 1:</h5>
+      <pre><strong>Input:</strong> root = [1,2,3,null,null,4,5]\n<strong>Output:</strong> [1,2,3,null,null,4,5]</pre>
+    `,
+    starterCode: `# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Codec:
+    def serialize(self, root):
+        """Encodes a tree to a single string."""
+        pass
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree."""
+        pass`,
+    testCases: [
+      { input: '[["Codec", "serialize", "deserialize"], [[], [1,2,3,null,null,4,5], "[1,2,3,null,null,4,5]"]]', expected: [null, "[1,2,3,null,null,4,5]", [1,2,3,null,null,4,5]] }
+    ],
+    explanation: `
+      <h4>Preorder Traversal or Level-Order BFS</h4>
+      <p>Serialize: Traverse tree appending node values and <code>"null"</code> markers. Deserialize: Parse tokens sequentially using recursion iterator or queue.</p>
+    `,
+    followUps: [
+      "Compare compact binary encoding vs string token serialization."
+    ]
   }
 ];
+
+// Helper to get all favorites
+function getFavorites() {
+    try {
+        const stored = localStorage.getItem("favorite_problems");
+        if (stored) return JSON.parse(stored);
+        return ["number-of-islands", "rotting-oranges", "word-ladder", "lru-cache"];
+    } catch (e) {
+        console.error("Error reading favorite problems", e);
+        return ["number-of-islands", "rotting-oranges", "word-ladder", "lru-cache"];
+    }
+}
+
+// Helper to check if a problem is favorited
+function isFavorite(problemId) {
+    const favs = getFavorites();
+    return favs.includes(problemId);
+}
+
+// Helper to toggle favorite status
+function toggleFavorite(problemId) {
+    try {
+        let favs = getFavorites();
+        if (favs.includes(problemId)) {
+            favs = favs.filter(id => id !== problemId);
+        } else {
+            favs.push(problemId);
+        }
+        localStorage.setItem("favorite_problems", JSON.stringify(favs));
+        return favs.includes(problemId);
+    } catch (e) {
+        console.error("Error updating favorite status", e);
+        return false;
+    }
+}
 
 // Helper to get all problems
 function getProblems() {
@@ -1247,6 +1977,11 @@ function addCustomProblem(problem) {
     }
 }
 
+window.getFavorites = getFavorites;
+window.isFavorite = isFavorite;
+window.toggleFavorite = toggleFavorite;
 window.getProblems = getProblems;
 window.addCustomProblem = addCustomProblem;
 window.problems = getProblems();
+
+

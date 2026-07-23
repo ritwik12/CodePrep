@@ -22,10 +22,6 @@
                 <div class="logo-icon">&lt;/&gt;</div>
                 <h1 class="logo-text">CodePrep Python</h1>
             </div>
-            <div class="header-nav-tabs" id="header-tabs">
-                <button id="tab-nav-dashboard" class="nav-tab active">Practice Arena</button>
-                <button id="tab-nav-roadmap" class="nav-tab">Interview Prep</button>
-            </div>
         </div>
         <div class="nav-controls">
             <button id="btn-back" class="btn-back-dashboard">
@@ -49,14 +45,22 @@
 
             <!-- Filters & Custom Problem Button -->
             <div class="filter-controls-row">
+                <div class="filter-pills">
+                    <button class="filter-pill active" id="pill-all" data-tab="all">All Questions (<span id="count-all">0</span>)</button>
+                    <button class="filter-pill" id="pill-fav" data-tab="favourites">⭐ Favourites (<span id="count-fav">0</span>)</button>
+                </div>
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="Search by title...">
                 </div>
                 <div class="select-filters">
                     <select id="filter-category" title="Filter by Category">
                         <option value="all">All Categories</option>
-                        <option value="Stack & Parsers">Stack & Parsers</option>
+                        <option value="favourites">⭐ Favourites</option>
+                        <option value="Graphs & BFS/DFS">Graphs & BFS/DFS</option>
                         <option value="Graphs & Cycle Detection">Graphs & Cycle Detection</option>
+                        <option value="Trees & Graphs">Trees & Graphs</option>
+                        <option value="Data Structure Design">Data Structure Design</option>
+                        <option value="Stack & Parsers">Stack & Parsers</option>
                         <option value="Advanced LLD & Dependencies">Advanced LLD & Dependencies</option>
                         <option value="Arrays & Hashing">Arrays & Hashing</option>
                         <option value="Sliding Window">Sliding Window</option>
@@ -80,267 +84,6 @@
             </div>
         </section>
 
-        <!-- View 3: Interview Prep Roadmap -->
-        <section id="roadmap-view" class="roadmap-view" style="display: none;">
-            <div class="roadmap-header">
-                <div class="roadmap-hero">
-                    <h2 class="welcome-title">Python Technical Interview Prep Roadmap</h2>
-                    <p class="welcome-subtitle">Master Python fluency, structured interview workflows, and complex graph / LLD dependency modeling patterns.</p>
-                </div>
-                
-                <!-- Quick Actions Panel -->
-                <div class="roadmap-quick-actions">
-                    <div class="action-card">
-                        <h3>⚡ Mock Interview Mode</h3>
-                        <p>Simulate a real 60-minute interview. We'll pick a random question, hide the test cases, and start the countdown timer.</p>
-                        <button id="btn-random-mock" class="btn-visualize" style="margin-top: 1rem; width: 100%;">Start Mock Interview</button>
-                    </div>
-                    <div class="action-card">
-                        <h3>📈 Prep Progress Tracker</h3>
-                        <div id="prep-progress-stats" style="margin-top: 0.5rem;">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabs for Roadmap Sections -->
-            <div class="roadmap-tabs-container">
-                <div class="roadmap-tabs">
-                    <button class="roadmap-tab-btn active" data-roadmap-tab="python-fluency">Python Fluency</button>
-                    <button class="roadmap-tab-btn" data-roadmap-tab="interview-workflow">Interview Workflow</button>
-                    <button class="roadmap-tab-btn" data-roadmap-tab="dsa-patterns">Core DSA Patterns</button>
-                    <button class="roadmap-tab-btn" data-roadmap-tab="dependency-modeling">Advanced Dependency & Parsers</button>
-                    <button class="roadmap-tab-btn" data-roadmap-tab="checklists">Edge-Cases & Checklists</button>
-                </div>
-                
-                <div class="roadmap-tab-content active" id="python-fluency">
-                    <div class="roadmap-card">
-                        <h3>🐍 Python Standard Libraries for DSA</h3>
-                        <p>Python's standard library is incredibly powerful. Knowing these collections and utilities is crucial for writing clean code under pressure.</p>
-                        
-                        <div class="code-snippets-grid">
-                            <div class="snippet-box">
-                                <h4>1. Priority Queue: <code>heapq</code></h4>
-                                <pre><code>import heapq
-# Min-Heap
-heap = []
-heapq.heappush(heap, 4)
-heapq.heappush(heap, 1)
-min_val = heapq.heappop(heap) # 1
-
-# Max-Heap (negate values)
-max_heap = []
-heapq.heappush(max_heap, -4)
-max_val = -heapq.heappop(max_heap) # 4
-
-# Heapify in-place: O(N)
-nums = [3, 2, 1]
-heapq.heapify(nums)</code></pre>
-                            </div>
-                            <div class="snippet-box">
-                                <h4>2. Double-Ended Queue: <code>collections.deque</code></h4>
-                                <pre><code>from collections import deque
-# O(1) appends and pops from both ends
-queue = deque([1, 2, 3])
-queue.append(4)
-queue.appendleft(0)
-val = queue.popleft() # 0
-val = queue.pop() # 4</code></pre>
-                            </div>
-                            <div class="snippet-box">
-                                <h4>3. Default Dict: <code>collections.defaultdict</code></h4>
-                                <pre><code>from collections import defaultdict
-# Avoid KeyError, initialize missing keys automatically
-adj = defaultdict(list)
-adj['A'].append('B') # Automatically creates list
-
-count = defaultdict(int)
-count['apple'] += 1 # Starts at 0</code></pre>
-                            </div>
-                            <div class="snippet-box">
-                                <h4>4. Counter: <code>collections.Counter</code></h4>
-                                <pre><code>from collections import Counter
-# Hash map for counting elements
-freq = Counter("abacaba") # {'a': 4, 'b': 2, 'c': 1}
-top_two = freq.most_common(2) # [('a', 4), ('b', 2)]</code></pre>
-                            </div>
-                            <div class="snippet-box">
-                                <h4>5. Binary Search: <code>bisect</code></h4>
-                                <pre><code>import bisect
-# Binary search on sorted lists
-arr = [1, 3, 3, 6, 7]
-# Find insertion point for 3 (right index)
-idx = bisect.bisect_right(arr, 3) # 3 (index after the 3s)
-idx = bisect.bisect_left(arr, 3) # 1 (first index of 3)</code></pre>
-                            </div>
-                            <div class="snippet-box">
-                                <h4>6. Memoization: <code>functools.lru_cache</code></h4>
-                                <pre><code>from functools import lru_cache
-# Auto-cache recursive function calls
-@lru_cache(maxsize=None)
-def fib(n):
-    if n &lt; 2: return n
-    return fib(n-1) + fib(n-2)</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="roadmap-tab-content" id="interview-workflow">
-                    <div class="roadmap-card">
-                        <h3>🔄 The 6-Step Interview Workflow</h3>
-                        <p>Follow this exact chronological structure during the technical interview. Do not jump into coding immediately!</p>
-                        <div class="workflow-steps">
-                            <div class="workflow-step">
-                                <div class="step-num">1</div>
-                                <div>
-                                    <h4>Clarify Requirements & Edge Cases</h4>
-                                    <p>Ask clarifying questions: "Is the graph connected?", "Are negative values possible?", "Can the inputs contain duplicates?"</p>
-                                </div>
-                            </div>
-                            <div class="workflow-step">
-                                <div class="step-num">2</div>
-                                <div>
-                                    <h4>Explore Constraints & Scale</h4>
-                                    <p>Check the maximum constraints: "If N is 10^5, an O(N^2) solution will TLE. We need O(N) or O(N log N)."</p>
-                                </div>
-                            </div>
-                            <div class="workflow-step">
-                                <div class="step-num">3</div>
-                                <div>
-                                    <h4>Formulate Brute Force</h4>
-                                    <p>Explain a brute force approach. Mention its complexity. This guarantees you have a baseline solution.</p>
-                                </div>
-                            </div>
-                            <div class="workflow-step">
-                                <div class="step-num">4</div>
-                                <div>
-                                    <h4>Optimize Design</h4>
-                                    <p>Pivot to optimal structures (e.g. hash maps, heaps, two pointers). Walk through your algorithm logic verbally before coding.</p>
-                                </div>
-                            </div>
-                            <div class="workflow-step">
-                                <div class="step-num">5</div>
-                                <div>
-                                    <h4>Write Clean Code</h4>
-                                    <p>Write modular code. Use descriptive variable names. Explain your implementation as you type it.</p>
-                                </div>
-                            </div>
-                            <div class="workflow-step">
-                                <div class="step-num">6</div>
-                                <div>
-                                    <h4>Dry Run & Analyze Complexity</h4>
-                                    <p>Manually trace your code with a small test case. Finally, state the exact Big-O Time and Space complexities.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="roadmap-tab-content" id="dsa-patterns">
-                    <div class="roadmap-card">
-                        <h3>💡 Core DSA Interview Patterns</h3>
-                        <div class="dsa-grid">
-                            <div class="dsa-card">
-                                <h4>Arrays & Hashing</h4>
-                                <p>Used for fast lookups (O(1)). Use frequency Counters or prefix sums. Keep track of indices or complements.</p>
-                            </div>
-                            <div class="dsa-card">
-                                <h4>Two Pointers</h4>
-                                <p>Use on sorted arrays to scan from ends inwards (like 2Sum) or fast/slow pointers (detecting cycles).</p>
-                            </div>
-                            <div class="dsa-card">
-                                <h4>Sliding Window</h4>
-                                <p>Contiguous sub-array search. Expand the right pointer, shrink the left pointer once constraints are violated.</p>
-                            </div>
-                            <div class="dsa-card">
-                                <h4>Stack</h4>
-                                <p>Ideal for nested structures, string parses, or monotonic search patterns (e.g. next greater element).</p>
-                            </div>
-                            <div class="dsa-card">
-                                <h4>Trees</h4>
-                                <p>Master DFS (Pre, In, Post order) and BFS (level-order). Know Binary Search Tree (BST) operations.</p>
-                            </div>
-                            <div class="dsa-card">
-                                <h4>Graphs</h4>
-                                <p>Represent via adjacency lists. Cycle detection (BFS Kahn / DFS coloring). Shortest path (BFS / Dijkstra).</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="roadmap-tab-content" id="dependency-modeling">
-                    <div class="roadmap-card">
-                        <h3>🕸️ Advanced Dependency & Parsing Patterns</h3>
-                        <div class="adv-pattern-row">
-                            <div class="adv-pattern-col">
-                                <h4>1. Graph Dependency Modeling</h4>
-                                <p>Problems like <strong>Course Schedule</strong>, <strong>Alien Dictionary</strong>, and <strong>Parallel Courses</strong> represent dependencies as directed edges. Build the adjacency list and in-degrees, then apply topological sort.</p>
-                                <ul>
-                                    <li><strong>Kahn's Algorithm:</strong> Queue processes nodes with 0 incoming dependencies.</li>
-                                    <li><strong>DFS Topological Sort:</strong> Post-order traversal reversed.</li>
-                                </ul>
-                            </div>
-                            <div class="adv-pattern-col">
-                                <h4>2. Spreadsheet/Excel Propagation</h4>
-                                <p>Excel cells require recalculation when dependencies change. This can be eager (write-time propagation via DFS) or lazy (read-time recursion with memoization).</p>
-                                <ul>
-                                    <li>Track cell dependencies (e.g. <code>A1 -> C3</code>).</li>
-                                    <li>Detect and raise errors for circular loops.</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="adv-pattern-row" style="margin-top: 1.5rem;">
-                            <div class="adv-pattern-col">
-                                <h4>3. String Parsing & Calculators</h4>
-                                <p>String parser problems (like <strong>Basic Calculator</strong> and <strong>Decode String</strong>) use stack structures to handle parentheses and order of operations.</p>
-                                <ul>
-                                    <li>Save current context <code>(running_sum, sign)</code> onto a stack when encountering <code>'('</code>.</li>
-                                    <li>Use Shunting-Yard algorithm for operator precedence (*, /, +, -).</li>
-                                </ul>
-                            </div>
-                            <div class="adv-pattern-col">
-                                <h4>4. Complex Data Structure Design</h4>
-                                <p>Combining multiple structures allows O(1) operations. For example, <strong>LRU Cache</strong> uses a Doubly Linked List for insertion order and a Hash Map for fast node retrieval.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="roadmap-tab-content" id="checklists">
-                    <div class="roadmap-card">
-                        <h3>📝 Technical Checklists</h3>
-                        <div class="checklists-grid">
-                            <div class="chk-box">
-                                <h4>⚠️ Edge-Case Checklist</h4>
-                                <ul>
-                                    <li>Empty values or null inputs</li>
-                                    <li>Single element arrays or lists</li>
-                                    <li>Negative integers or zero</li>
-                                    <li>Duplicate keys, values, or items</li>
-                                    <li>Cycles or loops in graphs/linked lists</li>
-                                    <li>Odd vs even lengths of strings/arrays</li>
-                                    <li>Off-by-one indices</li>
-                                </ul>
-                            </div>
-                            <div class="chk-box">
-                                <h4>📋 Mock Interview Self-Evaluation</h4>
-                                <ul>
-                                    <li>Did I ask clarifying questions first?</li>
-                                    <li>Did I discuss constraints and input boundaries?</li>
-                                    <li>Did I explain the time and space complexity of my draft solutions?</li>
-                                    <li>Did I write modular code with logical functions?</li>
-                                    <li>Did I manually dry run the code with variables tracked?</li>
-                                    <li>Did I double-check boundary conditions (e.g. 0, empty)?</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- View 2: Interactive Workspace -->
         <section id="workspace-view" class="workspace-view">
             
@@ -357,7 +100,12 @@ def fib(n):
                     <!-- Tab 1: Description -->
                     <div id="problem-description" class="tab-content active">
                         <div class="problem-info-header">
-                            <h3 id="problem-title" class="problem-info-title">Loading Problem...</h3>
+                            <div class="problem-title-wrapper" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                <h3 id="problem-title" class="problem-info-title">Loading Problem...</h3>
+                                <button id="btn-star-workspace" class="btn-star-workspace" title="Toggle Favourite">
+                                    <span id="star-icon-workspace">☆</span> <span id="star-text-workspace">Favourite</span>
+                                </button>
+                            </div>
                             <a id="leetcode-link" href="#" target="_blank" class="leetcode-link">
                                 View on LeetCode
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
@@ -560,6 +308,8 @@ def fib(n):
                     <div class="form-group">
                         <label for="cp-category">Category</label>
                         <select id="cp-category">
+                            <option value="Graphs & BFS/DFS">Graphs & BFS/DFS</option>
+                            <option value="Graphs & Cycle Detection">Graphs & Cycle Detection</option>
                             <option value="Arrays & Hashing">Arrays & Hashing</option>
                             <option value="Stack & Parsers">Stack & Parsers</option>
                             <option value="Sliding Window">Sliding Window</option>
