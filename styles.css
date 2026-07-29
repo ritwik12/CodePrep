@@ -910,6 +910,7 @@ header {
 }
 
 .success-modal {
+    position: relative;
     background: #0d1220;
     border: 1px solid var(--primary);
     border-radius: 20px;
@@ -919,6 +920,30 @@ header {
     text-align: center;
     box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
     animation: modalBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.modal-close-x {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.modal-close-x:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 @keyframes modalBounce {
@@ -957,17 +982,61 @@ header {
     background: linear-gradient(135deg, var(--secondary), var(--primary));
     color: white;
     border: none;
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: var(--transition);
 }
 
 .btn-modal-close:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+.btn-modal-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.btn-modal-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.console-followup-card {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-left: 4px solid var(--primary);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.console-followup-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.console-followup-list {
+    margin-left: 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
 }
 
 /* Dashboard Filter Row */
@@ -1703,4 +1772,326 @@ header {
     color: var(--text-muted);
     line-height: 1.7;
 }
+
+/* ==========================================================================
+   Enhanced Code Compiler Error Reporting Styles
+   ========================================================================== */
+
+.compilation-error-card {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 4px solid var(--difficulty-hard);
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-main);
+}
+
+.error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.error-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.error-badge-syntax {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.error-badge-runtime {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.error-badge-tle {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.error-location {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.error-message-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fca5a5;
+    margin-bottom: 0.75rem;
+    word-break: break-word;
+}
+
+.error-code-preview {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    position: relative;
+    overflow-x: auto;
+}
+
+.error-code-preview .code-line-num {
+    display: inline-block;
+    width: 2.5rem;
+    color: var(--text-muted);
+    border-right: 1px solid var(--border-color);
+    margin-right: 0.75rem;
+    user-select: none;
+}
+
+.error-code-preview .code-line-text {
+    display: inline-block;
+    color: #f87171;
+    font-weight: 500;
+}
+
+.error-code-preview .code-pointer {
+    color: #ef4444;
+    font-weight: 700;
+    margin-left: 3.25rem;
+    margin-top: 0.2rem;
+    line-height: 1;
+}
+
+.btn-jump-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-jump-error:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ffffff;
+    border-color: #ef4444;
+}
+
+.btn-jump-error-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-jump-error-sm:hover {
+    background: rgba(99, 102, 241, 0.3);
+    color: #ffffff;
+}
+
+.btn-toggle-traceback {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-toggle-traceback:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.traceback-content-collapsible {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    white-space: pre-wrap;
+    color: #f87171;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.error-details-box {
+    background: rgba(239, 68, 68, 0.04);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.error-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.error-type-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.error-type-tag.runtime-error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+.error-type-tag.tle {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+}
+
+.error-msg-inline {
+    font-weight: 600;
+    color: #fca5a5;
+    font-size: 0.85rem;
+}
+
+.error-sub-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.error-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.25rem;
+}
+
+.testcase-status.runtime-error {
+    color: var(--difficulty-hard);
+    font-weight: 700;
+}
+
+.testcase-status.tle {
+    color: #c084fc;
+    font-weight: 700;
+}
+
+.testcase-status.wrong-answer {
+    color: var(--difficulty-medium);
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   Submission Summary Banner Styles
+   ========================================================================== */
+
+.submission-summary-banner {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.submission-summary-banner.success {
+    border-left: 4px solid var(--difficulty-easy);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.submission-summary-banner.failure {
+    border-left: 4px solid var(--difficulty-hard);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.summary-banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.summary-badge-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-badge-title.accepted {
+    color: var(--difficulty-easy);
+}
+
+.summary-badge-title.rejected {
+    color: var(--difficulty-hard);
+}
+
+.summary-count-tag {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.25rem 0.65rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.summary-progress-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.summary-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+.summary-progress-fill.success {
+    background: var(--difficulty-easy);
+}
+
+.summary-progress-fill.failure {
+    background: linear-gradient(90deg, var(--difficulty-easy), var(--difficulty-hard));
+}
+
+
 

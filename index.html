@@ -268,6 +268,7 @@
     <!-- Success Modal Overlay -->
     <div id="success-modal-overlay" class="modal-overlay">
         <div class="success-modal">
+            <button id="btn-modal-x" class="modal-close-x" title="Close">&times;</button>
             <div class="success-icon">🏆</div>
             <h3 class="success-title">Challenge Complete!</h3>
             <p class="success-message">Excellent work! Your solution passed all test cases successfully and has been submitted.</p>
@@ -279,7 +280,10 @@
                 </ul>
             </div>
             
-            <button id="btn-modal-close" class="btn-modal-close">Back to Dashboard</button>
+            <div class="modal-actions" style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                <button id="btn-modal-stay" class="btn-modal-secondary">Stay on Editor</button>
+                <button id="btn-modal-close" class="btn-modal-close">Back to Dashboard</button>
+            </div>
         </div>
     </div>
 

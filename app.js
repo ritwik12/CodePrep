@@ -78,6 +78,64 @@ document.addEventListener("DOMContentLoaded", () => {
     initPyodide().catch(() => {});
 });
 
+// HTML Safety Helper
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Monaco Editor Error Markers & Navigation
+function updateEditorMarkers(errorInfo) {
+    if (!editor || typeof monaco === 'undefined') return;
+    if (errorInfo && errorInfo.line_number) {
+        const line = Math.max(1, parseInt(errorInfo.line_number));
+        const col = Math.max(1, parseInt(errorInfo.column_number || 1));
+        const lineContent = editor.getModel().getLineContent(line) || "";
+        const maxCol = Math.max(col + 1, lineContent.length + 1);
+
+        monaco.editor.setModelMarkers(editor.getModel(), 'python', [{
+            startLineNumber: line,
+            startColumn: col,
+            endLineNumber: line,
+            endColumn: maxCol,
+            message: `${errorInfo.error_type}: ${errorInfo.error_message}`,
+            severity: monaco.MarkerSeverity.Error
+        }]);
+    } else {
+        monaco.editor.setModelMarkers(editor.getModel(), 'python', []);
+    }
+}
+
+function jumpToLine(line) {
+    if (!editor) return;
+    const lineNum = parseInt(line);
+    if (isNaN(lineNum)) return;
+    editor.revealLineInCenter(lineNum);
+    editor.setPosition({ lineNumber: lineNum, column: 1 });
+    editor.focus();
+}
+
+function toggleTraceback(id) {
+    const el = document.getElementById(id);
+    const btn = document.getElementById(`btn-${id}`);
+    if (!el) return;
+    if (el.style.display === "none" || !el.style.display) {
+        el.style.display = "block";
+        if (btn) btn.innerText = "Hide Traceback";
+    } else {
+        el.style.display = "none";
+        if (btn) btn.innerText = "Show Traceback";
+    }
+}
+
+window.jumpToLine = jumpToLine;
+window.toggleTraceback = toggleTraceback;
+
 // Monaco Editor Initialization
 function initMonaco() {
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
@@ -98,11 +156,16 @@ function initMonaco() {
             padding: { top: 10, bottom: 10 }
         });
         
+        editor.onDidChangeModelContent(() => {
+            updateEditorMarkers(null);
+        });
+
         if (currentProblem) {
             loadProblemCode(currentProblem);
         }
     });
 }
+
 
 // Setup View Switching Navigation
 function setupNavigation() {
@@ -171,11 +234,39 @@ function setupEventListeners() {
     document.getElementById("btn-run").addEventListener("click", () => runCode(false));
     document.getElementById("btn-submit").addEventListener("click", () => runCode(true));
 
-    // Success Modal Close
-    document.getElementById("btn-modal-close").addEventListener("click", () => {
+    // Success Modal Event Handlers
+    const closeSuccessModal = () => {
         document.getElementById("success-modal-overlay").style.display = "none";
+    };
+
+    document.getElementById("btn-modal-close").addEventListener("click", () => {
+        closeSuccessModal();
         isMockMode = false;
         switchView(lastActiveView);
+    });
+
+    const btnStay = document.getElementById("btn-modal-stay");
+    if (btnStay) {
+        btnStay.addEventListener("click", closeSuccessModal);
+    }
+
+    const btnX = document.getElementById("btn-modal-x");
+    if (btnX) {
+        btnX.addEventListener("click", closeSuccessModal);
+    }
+
+    document.getElementById("success-modal-overlay").addEventListener("click", (e) => {
+        if (e.target.id === "success-modal-overlay") {
+            closeSuccessModal();
+        }
+    });
+
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeSuccessModal();
+            const cpOverlay = document.getElementById("custom-problem-overlay");
+            if (cpOverlay) cpOverlay.style.display = "none";
+        }
     });
 
     // Filters & Search
@@ -837,6 +928,8 @@ globals()['NestedInteger'] = NestedInteger
 import json
 import sys
 import io
+import re
+import traceback
 from collections import defaultdict, deque
 from typing import List, Dict, Set, Optional, Tuple
 import math
@@ -845,17 +938,101 @@ import bisect
 
 sys.stdout = io.StringIO()
 
+class StepLimitExceeded(Exception):
+    pass
+
+step_counter = 0
+MAX_STEPS = 500000
+
+def step_tracer(frame, event, arg):
+    global step_counter
+    if event == 'line':
+        step_counter += 1
+        if step_counter > MAX_STEPS:
+            raise StepLimitExceeded("Time Limit Exceeded: Maximum execution steps limit (500,000 operations) reached. Check for infinite loops or deep recursion.")
+    return step_tracer
+
+def extract_error_details(exc, user_code_str):
+    exc_type = type(exc).__name__
+    exc_msg = str(exc)
+    line_no = None
+    col_no = None
+    func_name = ""
+    
+    if isinstance(exc, SyntaxError):
+        line_no = exc.lineno
+        col_no = exc.offset
+        if exc.msg:
+            exc_msg = exc.msg
+    else:
+        tb = exc.__traceback__
+        frames = []
+        user_lines = user_code_str.split('\\n') if user_code_str else []
+        user_lines_count = len(user_lines)
+        
+        while tb:
+            frame = tb.tb_frame
+            lineno = tb.tb_lineno
+            filename = frame.f_code.co_filename
+            co_name = frame.f_code.co_name
+            
+            if filename == "<string>" and 1 <= lineno <= user_lines_count:
+                frames.append((lineno, co_name))
+            tb = tb.tb_next
+            
+        if frames:
+            line_no, func_name = frames[-1]
+
+    raw_tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    clean_lines = []
+    prev_line = None
+    repeat_count = 0
+    
+    for l in raw_tb:
+        if 'exec(user_code' in l or 'pyodide.runPython' in l or 'json_result =' in l:
+            continue
+        cleaned_l = l.replace('File "<string>"', 'File "solution.py"')
+        
+        if cleaned_l == prev_line:
+            repeat_count += 1
+            if repeat_count == 2:
+                clean_lines.append("  [... repeated stack frames collapsed ...]\\n")
+            continue
+        else:
+            prev_line = cleaned_l
+            repeat_count = 0
+            clean_lines.append(cleaned_l)
+            
+    clean_tb = "".join(clean_lines).strip()
+    
+    line_code = ""
+    if line_no and user_code_str:
+        user_lines = user_code_str.split('\\n')
+        if 1 <= line_no <= len(user_lines):
+            line_code = user_lines[line_no - 1]
+            
+    return {
+        "error_type": exc_type,
+        "error_message": exc_msg,
+        "line_number": line_no,
+        "column_number": col_no,
+        "func_name": func_name,
+        "line_code": line_code,
+        "traceback": clean_tb
+    }
+
 ${helpersSnippet}
 
 try:
     exec(user_code, globals())
 except Exception as init_err:
-    import traceback
+    err_details = extract_error_details(init_err, user_code)
     json_result = json.dumps([{
         "success": False,
         "is_init_error": True,
         "error": str(init_err),
-        "traceback": traceback.format_exc(),
+        "error_info": err_details,
+        "traceback": err_details["traceback"],
         "stdout": sys.stdout.getvalue()
     }])
 else:
@@ -864,6 +1041,8 @@ else:
     for idx, tc in enumerate(test_cases):
         sys.stdout.seek(0)
         sys.stdout.truncate(0)
+        step_counter = 0
+        sys.settrace(step_tracer)
         
         input_str = tc["input"]
         try:
@@ -960,13 +1139,17 @@ else:
                 "stdout": captured_stdout
             })
         except Exception as e:
-            import traceback
+            captured_stdout = sys.stdout.getvalue()
+            err_details = extract_error_details(e, user_code)
             results.append({
                 "success": False,
                 "error": str(e),
-                "traceback": traceback.format_exc(),
-                "stdout": sys.stdout.getvalue()
+                "error_info": err_details,
+                "traceback": err_details["traceback"],
+                "stdout": captured_stdout
             })
+        finally:
+            sys.settrace(None)
     json_result = json.dumps(results)
 json_result
 `;
@@ -977,14 +1160,63 @@ json_result
         
         if (pyResults.length === 1 && pyResults[0].is_init_error) {
             const err = pyResults[0];
+            const errInfo = err.error_info || {
+                error_type: "SyntaxError",
+                error_message: err.error || "Compilation/Syntax error",
+                traceback: err.traceback || ""
+            };
+
+            updateEditorMarkers(errInfo);
+
+            let codePreviewHTML = "";
+            if (errInfo.line_code) {
+                let pointerStr = "";
+                if (errInfo.column_number) {
+                    pointerStr = " ".repeat(Math.max(0, errInfo.column_number - 1)) + "^";
+                }
+                codePreviewHTML = `
+                    <div class="error-code-preview">
+                        <div class="code-line-num">${errInfo.line_number}</div>
+                        <div class="code-line-text">${escapeHtml(errInfo.line_code)}</div>
+                        ${pointerStr ? `<div class="code-pointer">${pointerStr}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            let jumpBtnHTML = "";
+            if (errInfo.line_number) {
+                jumpBtnHTML = `
+                    <button class="btn-jump-error" onclick="jumpToLine(${errInfo.line_number})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        Jump to Line ${errInfo.line_number} in Editor
+                    </button>
+                `;
+            }
+
             consoleContent.innerHTML = `
-                <div style="color: var(--difficulty-hard); font-weight: 700; margin-bottom: 0.5rem;">Python Syntax/Runtime Error:</div>
-                <pre style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 8px; font-family: monospace; white-space: pre-wrap; color: var(--difficulty-hard);">${err.traceback || err.error}</pre>
+                <div class="compilation-error-card">
+                    <div class="error-header">
+                        <span class="error-badge error-badge-syntax">${escapeHtml(errInfo.error_type || "Compilation Error")}</span>
+                        ${errInfo.line_number ? `<span class="error-location">Line ${errInfo.line_number}${errInfo.column_number ? `:${errInfo.column_number}` : ''}</span>` : ''}
+                    </div>
+                    <div class="error-message-text">${escapeHtml(errInfo.error_type)}: ${escapeHtml(errInfo.error_message)}</div>
+                    ${codePreviewHTML}
+                    ${jumpBtnHTML}
+                    ${errInfo.traceback ? `
+                        <div style="margin-top: 0.75rem;">
+                            <button class="btn-toggle-traceback" id="btn-tb-init" onclick="toggleTraceback('tb-init')">Show Full Traceback</button>
+                            <pre id="tb-init" class="traceback-content-collapsible" style="display: none; margin-top: 0.5rem;">${escapeHtml(errInfo.traceback)}</pre>
+                        </div>
+                    ` : ''}
+                </div>
             `;
             return;
         }
 
         let allPassed = true;
+        let passedCount = 0;
+        const totalCount = currentProblem.testCases.length;
+        let firstErrorLine = null;
         let resultsHTML = `<div class="testcase-results-grid">`;
 
         currentProblem.testCases.forEach((tc, idx) => {
@@ -993,6 +1225,9 @@ json_result
             let actualStr = "";
             let errorOccurred = false;
             let stdoutHTML = "";
+            let statusText = "Passed";
+            let statusClass = "passed";
+            let errorBoxHTML = "";
 
             if (runResult && runResult.success) {
                 const actualOutput = runResult.actual;
@@ -1013,13 +1248,60 @@ json_result
                 }
 
                 actualStr = typeof actualOutput === "object" ? JSON.stringify(actualOutput) : String(actualOutput);
+                if (!isSuccess) {
+                    statusText = "Wrong Answer";
+                    statusClass = "wrong-answer";
+                }
             } else {
                 errorOccurred = true;
                 isSuccess = false;
-                actualStr = runResult ? `Error: ${runResult.error}` : "Execution failed";
+                const errInfo = (runResult && runResult.error_info) ? runResult.error_info : {
+                    error_type: "RuntimeError",
+                    error_message: runResult ? runResult.error : "Execution failed",
+                    traceback: runResult ? runResult.traceback : ""
+                };
+
+                let tagClass = "runtime-error";
+                if (errInfo.error_type === "StepLimitExceeded" || errInfo.error_type === "TimeoutError") {
+                    statusText = "Time Limit Exceeded";
+                    statusClass = "tle";
+                    tagClass = "tle";
+                } else {
+                    statusText = "Runtime Error";
+                    statusClass = "runtime-error";
+                }
+
+                if (!firstErrorLine && errInfo.line_number) {
+                    firstErrorLine = errInfo;
+                }
+
+                errorBoxHTML = `
+                    <div class="error-details-box">
+                        <div class="error-title">
+                            <span class="error-type-tag ${tagClass}">${escapeHtml(errInfo.error_type)}</span>
+                            <span class="error-msg-inline">${escapeHtml(errInfo.error_message)}</span>
+                        </div>
+                        ${errInfo.line_number ? `
+                            <div class="error-sub-info">Occurred at <strong>Line ${errInfo.line_number}</strong>${errInfo.func_name ? ` in <code>${escapeHtml(errInfo.func_name)}()</code>` : ''}</div>
+                        ` : ''}
+                        ${errInfo.line_code ? `
+                            <div class="error-code-preview">
+                                <div class="code-line-num">${errInfo.line_number}</div>
+                                <div class="code-line-text">${escapeHtml(errInfo.line_code)}</div>
+                            </div>
+                        ` : ''}
+                        <div class="error-actions">
+                            ${errInfo.line_number ? `<button class="btn-jump-error-sm" onclick="jumpToLine(${errInfo.line_number})">Jump to Line ${errInfo.line_number}</button>` : ''}
+                            ${errInfo.traceback ? `<button class="btn-toggle-traceback" id="btn-tb-tc-${idx}" onclick="toggleTraceback('tb-tc-${idx}')">Show Traceback</button>` : ''}
+                        </div>
+                        ${errInfo.traceback ? `<pre id="tb-tc-${idx}" class="traceback-content-collapsible" style="display: none; margin-top: 0.5rem;">${escapeHtml(errInfo.traceback)}</pre>` : ''}
+                    </div>
+                `;
             }
 
-            if (!isSuccess) {
+            if (isSuccess) {
+                passedCount++;
+            } else {
                 allPassed = false;
             }
 
@@ -1027,7 +1309,7 @@ json_result
                 stdoutHTML = `
                     <div class="stdout-container" style="margin-top: 0.5rem; background: rgba(0,0,0,0.25); padding: 0.5rem; border-radius: 4px; border-left: 3px solid var(--secondary);">
                         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Stdout</div>
-                        <pre style="font-family: monospace; font-size: 0.8rem; margin: 0; white-space: pre-wrap; color: var(--text-main);">${runResult.stdout}</pre>
+                        <pre style="font-family: monospace; font-size: 0.8rem; margin: 0; white-space: pre-wrap; color: var(--text-main);">${escapeHtml(runResult.stdout)}</pre>
                     </div>
                 `;
             }
@@ -1042,10 +1324,11 @@ json_result
                     <div class="testcase-card ${isSuccess ? 'success' : 'failure'}">
                         <div class="testcase-card-header">
                             <span>Test Case ${idx + 1} (Hidden)</span>
-                            <span class="testcase-status ${isSuccess ? 'passed' : 'failed'}">${isSuccess ? 'Passed' : 'Failed'}</span>
+                            <span class="testcase-status ${statusClass}">${statusText}</span>
                         </div>
                         <div class="testcase-card-body">
                             <span style="color: var(--text-muted); font-style: italic;">Outputs hidden for mock/hidden test evaluation.</span>
+                            ${errorBoxHTML}
                             ${stdoutHTML}
                         </div>
                     </div>
@@ -1055,12 +1338,14 @@ json_result
                     <div class="testcase-card ${isSuccess ? 'success' : 'failure'}">
                         <div class="testcase-card-header">
                             <span>Test Case ${idx + 1}</span>
-                            <span class="testcase-status ${isSuccess ? 'passed' : 'failed'}">${isSuccess ? 'Passed' : 'Failed'}</span>
+                            <span class="testcase-status ${statusClass}">${statusText}</span>
                         </div>
                         <div class="testcase-card-body">
-                            <span>Input: <strong>${tc.input}</strong></span>
-                            <span>Expected Output: <strong>${expectedStr}</strong></span>
-                            <span>Your Output: <strong style="color: ${isSuccess ? 'var(--difficulty-easy)' : 'var(--difficulty-hard)'}">${actualStr}</strong></span>
+                            <span>Input: <strong>${escapeHtml(tc.input)}</strong></span>
+                            ${errorOccurred ? errorBoxHTML : `
+                                <span>Expected Output: <strong>${escapeHtml(expectedStr)}</strong></span>
+                                <span>Your Output: <strong style="color: ${isSuccess ? 'var(--difficulty-easy)' : 'var(--difficulty-hard)'}">${escapeHtml(actualStr)}</strong></span>
+                            `}
                             ${stdoutHTML}
                         </div>
                     </div>
@@ -1069,13 +1354,52 @@ json_result
         });
 
         resultsHTML += `</div>`;
-        consoleContent.innerHTML = resultsHTML;
+
+        const passPercentage = totalCount > 0 ? Math.round((passedCount / totalCount) * 100) : 0;
+        const summaryTitle = isSubmit ? (allPassed ? "Accepted" : "Submission Failed") : (allPassed ? "All Tests Passed" : "Execution Failed");
+        const summaryClass = allPassed ? "accepted" : "rejected";
+        const bannerClass = allPassed ? "success" : "failure";
+
+        const summaryBannerHTML = `
+            <div class="submission-summary-banner ${bannerClass}">
+                <div class="summary-banner-header">
+                    <span class="summary-badge-title ${summaryClass}">
+                        ${allPassed ? '✓' : '✗'} ${summaryTitle}
+                    </span>
+                    <span class="summary-count-tag">${passedCount} / ${totalCount} Test Cases Passed (${passPercentage}%)</span>
+                </div>
+                <div class="summary-progress-bg">
+                    <div class="summary-progress-fill ${bannerClass}" style="width: ${passPercentage}%;"></div>
+                </div>
+            </div>
+        `;
+
+        let consoleFollowupHTML = "";
+        if (allPassed && isSubmit && currentProblem.followUps && currentProblem.followUps.length > 0) {
+            consoleFollowupHTML = `
+                <div class="console-followup-card">
+                    <div class="console-followup-title">💡 Follow-up Questions to Consider:</div>
+                    <ul class="console-followup-list">
+                        ${currentProblem.followUps.map(q => `<li>${escapeHtml(q)}</li>`).join("")}
+                    </ul>
+                </div>
+            `;
+        }
+
+        consoleContent.innerHTML = summaryBannerHTML + consoleFollowupHTML + resultsHTML;
+
+        // Update Monaco Editor markers: if there's a runtime error, mark the first failing line
+        if (firstErrorLine) {
+            updateEditorMarkers(firstErrorLine);
+        } else {
+            updateEditorMarkers(null);
+        }
 
         if (allPassed) {
             if (isSubmit) {
                 localStorage.setItem(`status_${currentProblem.id}`, "solved");
                 
-                // Load follow-up questions
+                // Load follow-up questions into modal
                 const fuSection = document.getElementById("followup-section");
                 const fuList = document.getElementById("followup-list");
                 fuList.innerHTML = "";
@@ -1092,12 +1416,9 @@ json_result
                 }
                 
                 showSuccessModal();
-            } else {
-                consoleContent.insertAdjacentHTML('afterbegin', `<div style="color: var(--difficulty-easy); font-weight: 700; margin-bottom: 1rem;">All tests passed! Click 'Submit Code' to complete the challenge.</div>`);
             }
-        } else {
-            consoleContent.insertAdjacentHTML('afterbegin', `<div style="color: var(--difficulty-hard); font-weight: 700; margin-bottom: 1rem;">Some test cases failed. Review details below.</div>`);
         }
+
 
     } catch (pyErr) {
         console.error("Pyodide execution error:", pyErr);
