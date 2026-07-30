@@ -1910,6 +1910,354 @@ class Codec:
   }
 ];
 
+// Full editorials are kept separate from the problem statements so the same
+// structured reading experience is available for every built-in question.
+const editorialDetails = {
+    "course-schedule": {
+        insight: "A course plan is possible exactly when the prerequisite graph has no directed cycle.",
+        steps: ["Build edges prerequisite → course and an indegree for every course.", "Repeatedly take every course whose indegree is zero, then reduce its neighbours' indegrees.", "If the number taken is n, every course is finishable; otherwise a cycle remains."], complexity: "O(V + E) time and O(V + E) space.", pitfall: "An isolated course still counts as completed, so seed the queue with every zero-indegree course."
+    },
+    "course-schedule-ii": {
+        insight: "This is Kahn's topological sort, but the order in which nodes leave the queue is also the answer.",
+        steps: ["Create prerequisite → course edges and indegrees.", "Process zero-indegree courses in a queue, appending each to the answer before relaxing its outgoing edges.", "Return the answer only if it contains all n courses; otherwise return an empty list."], complexity: "O(V + E) time and O(V + E) space.", pitfall: "Do not reverse Kahn's BFS output; it already places prerequisites first."
+    },
+    "alien-dictionary": {
+        insight: "The first different character in two adjacent dictionary words is the only ordering rule they reveal.",
+        steps: ["Add every seen character as a graph node.", "For each adjacent pair, add one edge at its first mismatch; reject a longer word before its exact prefix.", "Topologically sort all characters and reject the input if a cycle prevents visiting them all."], complexity: "O(total characters + unique letters + rules) time and space.", pitfall: "The prefix case [\"abc\", \"ab\"] is invalid even though there is no mismatching character."
+    },
+    "parallel-courses": {
+        insight: "Kahn's BFS levels model semesters: all currently available courses can be taken together.",
+        steps: ["Build the prerequisite graph and indegrees.", "For each queue layer, take every available course and unlock its successors.", "Count layers and verify that n courses were processed; a short count means a cycle."], complexity: "O(n + relations) time and O(n + relations) space.", pitfall: "Increment semesters once per BFS layer, not once per course."
+    },
+    "clone-graph": {
+        insight: "Memoize each clone before exploring neighbours so repeated edges and cycles reuse the same copy.",
+        steps: ["Return null for an empty input.", "On first seeing a node, create and store its clone in a map keyed by the original node.", "Recursively or iteratively clone each neighbour and append that mapped clone."], complexity: "O(V + E) time and O(V) space.", pitfall: "Creating the clone after visiting neighbours causes infinite recursion on an undirected edge."
+    },
+    "number-of-islands": {
+        insight: "Each unvisited land cell starts one island; flood-filling it prevents counting that island again.",
+        steps: ["Scan every cell.", "When land is found, increment the answer and DFS/BFS through its four-directional land neighbours.", "Mark visited land as water or track it in a visited set."], complexity: "O(mn) time; O(mn) worst-case traversal space.", pitfall: "Only horizontal and vertical neighbours connect an island."
+    },
+    "reconstruct-itinerary": {
+        insight: "Using every ticket once is an Eulerian-path problem; postorder Hierholzer traversal handles forced dead ends.",
+        steps: ["Store each airport's destinations in reverse lexical order so popping yields the smallest choice.", "DFS from JFK, consuming an edge before visiting its destination.", "Append an airport after all of its outgoing tickets are consumed, then reverse the result."], complexity: "O(E log E) time for sorting and O(E) space.", pitfall: "A greedy preorder path can get stuck; append on the way back instead."
+    },
+    "evaluate-division": {
+        insight: "Each equation creates two weighted graph edges, and multiplying edge weights along a path gives the requested ratio.",
+        steps: ["Add a/b with weight v and b/a with weight 1/v.", "For every query, BFS or DFS from numerator while carrying the cumulative product.", "Return -1 when either variable is absent or no path reaches the denominator."], complexity: "O(V + E) per query in the worst case; O(V + E) space.", pitfall: "A query x/x is 1 only when x is known to the graph."
+    },
+    "network-delay-time": {
+        insight: "The time when every node receives the signal is the maximum shortest-path distance from k.",
+        steps: ["Build a weighted directed adjacency list.", "Use Dijkstra's algorithm with a min-heap, ignoring stale heap entries.", "If all n nodes are reached, return the largest settled distance; otherwise return -1."], complexity: "O((V + E) log V) time and O(V + E) space.", pitfall: "Dijkstra is valid because all travel times are non-negative."
+    },
+    "design-excel-sum-formula": {
+        insight: "Store formula references rather than only their current total, then evaluate them recursively when a cell is read.",
+        steps: ["Keep each cell as either a literal value or a frequency map of referenced cells.", "Expand ranges into individual references, preserving duplicate references as counts.", "Evaluate a formula by summing count × recursively evaluated dependency."], complexity: "Depends on referenced cells per get; storage is proportional to stored references.", pitfall: "Overwriting a formula must discard its old references."
+    },
+    "lru-cache": {
+        insight: "A hash map finds a key in O(1), while a doubly linked list moves that key to the most-recent end in O(1).",
+        steps: ["Use sentinel head and tail nodes; keep most recent beside head.", "On get, return -1 if missing; otherwise remove and reinsert the node at the front.", "On put, update-and-promote an existing key or add a new node and evict tail.prev if over capacity."], complexity: "O(1) average time per operation and O(capacity) space.", pitfall: "Use a doubly linked list so an arbitrary mapped node can be removed in constant time."
+    },
+    "lfu-cache": {
+        insight: "Constant-time LFU needs a key-to-node map plus one recency-ordered list for each frequency.",
+        steps: ["Map keys to nodes and frequencies to doubly linked lists; maintain minFreq.", "Every access removes the node from its old frequency list and adds it to the new one.", "When full, evict the least-recent node from the minFreq list, then insert the new key at frequency one."], complexity: "O(1) average time per operation and O(capacity) space.", pitfall: "If the old minimum-frequency list becomes empty after an access, advance minFreq."
+    },
+    "browser-history": {
+        insight: "An array plus a current index and a last-valid index represents back and forward history directly.",
+        steps: ["Append a visited URL after truncating forward history.", "Move current left by at most steps for back.", "Move current right by at most steps without passing the last valid entry for forward."], complexity: "O(1) per operation, aside from occasional array resizing; O(n) space.", pitfall: "A new visit invalidates every forward page."
+    },
+    "design-file-system": {
+        insight: "A path can be created only if its parent path is already present.",
+        steps: ["Map existing full paths to values, starting with an implicit root.", "Reject an existing path and find the parent using the final slash.", "Store the path only when that parent exists; get is a map lookup with -1 as the fallback."], complexity: "O(length of path) to parse and O(1) average map access; O(number of paths) space.", pitfall: "The parent of /a/b is /a, not an empty string."
+    },
+    "time-map": {
+        insight: "Timestamps for one key arrive in increasing order, so each key can keep an append-only sorted history.",
+        steps: ["Map each key to pairs of (timestamp, value).", "Append on set.", "Binary-search for the rightmost timestamp that is at most the query time."], complexity: "O(1) set and O(log n) get per key; O(total entries) space.", pitfall: "Return an empty string when every stored timestamp is later than the query."
+    },
+    "design-twitter": {
+        insight: "The feed is a k-way merge of each followed user's newest tweets, so a max-heap only expands the newest candidates.",
+        steps: ["Give every tweet a decreasing or increasing global timestamp and link it to that user's previous tweet.", "Push the newest tweet from the user and each followee into a max-heap.", "Pop up to ten tweets, pushing each popped tweet's predecessor."], complexity: "O((F + 10) log F) feed time and O(total tweets + follows) space.", pitfall: "A user must see their own tweets even if self-following is not stored."
+    },
+    "basic-calculator-i": {
+        insight: "Only addition/subtraction and parentheses matter, so save the running result and sign when entering a parenthesized expression.",
+        steps: ["Parse multi-digit numbers and apply the current sign.", "On '(', push the current result and sign, then reset the inner expression.", "On ')', combine the inner result with the saved sign and outer result."], complexity: "O(n) time and O(n) stack space.", pitfall: "Whitespace is irrelevant, and a unary minus is handled by the current sign."
+    },
+    "basic-calculator-ii": {
+        insight: "A stack lets multiplication and division be resolved immediately while addition and subtraction wait until the end.",
+        steps: ["Read one number at a time and remember the previous operator.", "Push signed values for +/-, but replace the top for */.", "Sum the stack after the scan."], complexity: "O(n) time and O(n) space.", pitfall: "Python division must truncate toward zero, not floor for negative values."
+    },
+    "basic-calculator-iii": {
+        insight: "Use the calculator-II stack rule inside each parenthesized scope; recursion naturally creates those scopes.",
+        steps: ["Parse numbers and operators until the current scope ends.", "On '(', recursively evaluate the inner scope as the next number.", "Apply the previous operator using a local stack, then sum the stack at scope end."], complexity: "O(n) time and O(n) space.", pitfall: "Advance past ')' exactly once after the recursive call returns."
+    },
+    "evaluate-reverse-polish-notation": {
+        insight: "Postfix order guarantees that an operator's two operands are the latest two stack values.",
+        steps: ["Push every numeric token.", "For an operator, pop right first and left second, apply left operator right, and push the result.", "The final stack item is the answer."], complexity: "O(n) time and O(n) space.", pitfall: "Operand order matters for subtraction and division."
+    },
+    "decode-string": {
+        insight: "Nested repetitions require remembering the prefix and repeat count at every opening bracket.",
+        steps: ["Build multi-digit counts as you scan.", "On '[', push the current string and count, then start a fresh inner string.", "On ']', pop and form prefix + inner × count."], complexity: "O(n + output size) time and O(n) auxiliary space.", pitfall: "Counts can have multiple digits, such as 12[a]."
+    },
+    "mini-parser": {
+        insight: "A stack holds the currently open lists; commas only separate values and need no special structure.",
+        steps: ["Create a new NestedInteger on '[', attach it to the parent when one exists, and push it.", "Parse complete signed numbers between delimiters and add them to the current list.", "On ']', pop the completed list; a bare number is the single-number answer."], complexity: "O(n) time and O(n) space.", pitfall: "Flush the final number when the string ends or a closing delimiter is reached."
+    },
+    "detonate-the-maximum-bombs": {
+        insight: "If bomb i can reach bomb j, draw i → j; the answer is the largest reachable set from any start.",
+        steps: ["For every ordered pair, compare squared distance with i's squared radius.", "Run DFS/BFS from each bomb and count visited nodes.", "Return the largest count."], complexity: "O(n³) time with repeated DFS and O(n²) space.", pitfall: "Use squared distances to avoid floating-point errors."
+    },
+    "minesweeper": {
+        insight: "Clicking an empty cell is a flood fill, but a numbered adjacent-mine count stops the expansion.",
+        steps: ["If the click is a mine, mark it X and return.", "For each revealed empty cell, count adjacent mines.", "Write the number if nonzero; otherwise write B and enqueue its unrevealed empty neighbours."], complexity: "O(mn) time and O(mn) space in the worst case.", pitfall: "Do not expand outward from a numbered cell."
+    },
+    "number-of-provinces": {
+        insight: "Each province is one connected component in the adjacency matrix.",
+        steps: ["Iterate cities and start DFS/BFS only from an unvisited city.", "During traversal, visit every j whose matrix entry for the current city is one.", "Each traversal contributes exactly one province."], complexity: "O(n²) time and O(n) space.", pitfall: "The diagonal represents self-connections and should not create extra work."
+    },
+    "max-area-of-island": {
+        insight: "Flood-fill each island once and return the largest traversal count.",
+        steps: ["Scan the grid for land.", "DFS/BFS from each unvisited land cell, marking it visited and accumulating its area.", "Update the maximum after each component."], complexity: "O(mn) time and O(mn) worst-case traversal space.", pitfall: "Reset the area counter for each new island."
+    },
+    "rotting-oranges": {
+        insight: "All rotten oranges spread simultaneously, which is exactly multi-source BFS by minute.",
+        steps: ["Queue all initially rotten oranges and count fresh ones.", "Process one queue layer per minute, rotting adjacent fresh oranges.", "Return minutes when fresh reaches zero, otherwise -1."], complexity: "O(mn) time and O(mn) space.", pitfall: "Return 0 immediately if there are no fresh oranges."
+    },
+    "walls-and-gates": {
+        insight: "Starting BFS from every gate fills each room from its nearest gate in one pass.",
+        steps: ["Queue all zero-valued gates.", "Expand only into INF rooms and set a room to its parent's distance plus one.", "Leave walls and already-filled rooms untouched."], complexity: "O(mn) time and O(mn) space.", pitfall: "Running BFS from every room is much slower and unnecessary."
+    },
+    "battleships-in-a-board": {
+        insight: "Because ships never touch, every ship has exactly one cell with no X above and no X to its left.",
+        steps: ["Scan every board cell.", "Count an X only when its top and left neighbours are absent or dots.", "Ignore the remainder of that ship."], complexity: "O(mn) time and O(1) extra space.", pitfall: "Parenthesize the top/left boundary checks correctly."
+    },
+    "escape-the-spreading-fire": {
+        insight: "Whether a waiting time works is monotonic, so binary-search it after precomputing fire arrival times.",
+        steps: ["Run multi-source BFS from fire cells to get each cell's fire time.", "For a candidate wait, BFS the person and require arrival before fire (equal time is allowed only at the safehouse).", "Binary-search the largest feasible wait, including the infinite-answer check."], complexity: "O(mn log(mn)) time and O(mn) space.", pitfall: "The destination has the special tie rule; intermediate cells do not."
+    },
+    "number-of-connected-components-in-an-undirected-graph": {
+        insight: "A successful union joins two components; a failed union means they were already connected.",
+        steps: ["Initialize each node as its own DSU parent and set components to n.", "For each edge, union its roots.", "Decrement the count only when the roots differ."], complexity: "O(E α(V)) time and O(V) space.", pitfall: "Path compression and union by rank keep repeated finds nearly constant."
+    },
+    "word-ladder": {
+        insight: "Every transformation costs one move, so BFS finds the shortest sequence; wildcard patterns generate neighbours efficiently.",
+        steps: ["Reject early if endWord is absent.", "Map every one-character wildcard pattern to the words matching it.", "BFS by levels from beginWord, marking words or patterns used, and return when endWord is reached."], complexity: "O(N × L²) typical preprocessing/search and O(N × L) space.", pitfall: "The length is counted in words, so start BFS at distance one."
+    },
+    "redundant-connection": {
+        insight: "In a tree, the first edge whose endpoints are already connected is the extra edge that closes a cycle.",
+        steps: ["Initialize a DSU over node labels.", "Process edges in input order.", "Return the first edge whose roots are equal; otherwise union its components."], complexity: "O(E α(V)) time and O(V) space.", pitfall: "Node labels are one-based, so allocate enough parent entries."
+    },
+    "accounts-merge": {
+        insight: "Emails are nodes; all emails on one account belong to the same connected component.",
+        steps: ["Connect the first email in an account to every other email, recording an owner name.", "Traverse each unvisited email component.", "Sort its emails and prepend the recorded name."], complexity: "O(E log E) including sorting and O(E) space.", pitfall: "Names are not identifiers—only shared emails merge accounts."
+    },
+    "implement-trie-prefix-tree": {
+        insight: "A Trie shares prefixes, so walking a word or prefix is just following one child edge per character.",
+        steps: ["Represent each node with a child map and an end-of-word flag.", "Insert by creating missing character nodes, then mark the final node.", "Search requires the end flag; startsWith only requires the path."], complexity: "O(L) per operation and O(total stored characters) space.", pitfall: "A prefix node is not automatically a complete word."
+    },
+    "find-median-from-data-stream": {
+        insight: "Two balanced heaps keep the middle one or two values at their tops.",
+        steps: ["Put the lower half in a max-heap (negated values in Python) and upper half in a min-heap.", "Insert into the suitable heap, then rebalance so lower has either the same size or one more.", "Read lower top for odd count or average both tops for even count."], complexity: "O(log n) add, O(1) median, and O(n) space.", pitfall: "Rebalance after every insertion, not only when sizes differ by two."
+    },
+    "lowest-common-ancestor-of-a-binary-tree": {
+        insight: "A postorder call returns a target if it finds one; the first node receiving one target from each side is the LCA.",
+        steps: ["Return null for an empty subtree and return the node if it is p or q.", "Recurse into left and right.", "Return the current node when both sides are non-null; otherwise propagate the non-null side."], complexity: "O(n) time and O(h) recursion space.", pitfall: "When one target is an ancestor of the other, returning the target immediately is correct."
+    },
+    "serialize-and-deserialize-binary-tree": {
+        insight: "Null markers make a tree traversal unambiguous, allowing the decoder to rebuild exactly the same shape.",
+        steps: ["Serialize with preorder, writing a marker for every missing child.", "Consume the token stream in preorder during deserialization.", "Create a node for a value, then recursively build its left and right subtrees."], complexity: "O(n) time and O(n) output/storage.", pitfall: "Without null markers, different tree shapes can serialize to the same values."
+    }
+};
+
+const referenceSolutions = {
+    "course-schedule": String.raw`from collections import deque
+
+class Solution:
+    def canFinish(self, numCourses, prerequisites):
+        graph = [[] for _ in range(numCourses)]
+        indegree = [0] * numCourses
+        for course, prereq in prerequisites:
+            graph[prereq].append(course)
+            indegree[course] += 1
+        queue = deque(i for i in range(numCourses) if indegree[i] == 0)
+        taken = 0
+        while queue:
+            course = queue.popleft()
+            taken += 1
+            for nxt in graph[course]:
+                indegree[nxt] -= 1
+                if indegree[nxt] == 0:
+                    queue.append(nxt)
+        return taken == numCourses`,
+    "course-schedule-ii": String.raw`from collections import deque
+
+class Solution:
+    def findOrder(self, numCourses, prerequisites):
+        graph = [[] for _ in range(numCourses)]
+        indegree = [0] * numCourses
+        for course, prereq in prerequisites:
+            graph[prereq].append(course); indegree[course] += 1
+        queue = deque(i for i in range(numCourses) if indegree[i] == 0)
+        order = []
+        while queue:
+            node = queue.popleft(); order.append(node)
+            for nxt in graph[node]:
+                indegree[nxt] -= 1
+                if indegree[nxt] == 0: queue.append(nxt)
+        return order if len(order) == numCourses else []`,
+    "alien-dictionary": String.raw`from collections import deque
+
+class Solution:
+    def alienOrder(self, words):
+        graph = {ch: set() for word in words for ch in word}
+        indegree = {ch: 0 for ch in graph}
+        for first, second in zip(words, words[1:]):
+            if len(first) > len(second) and first.startswith(second): return ""
+            for a, b in zip(first, second):
+                if a != b:
+                    if b not in graph[a]: graph[a].add(b); indegree[b] += 1
+                    break
+        queue = deque(ch for ch in graph if indegree[ch] == 0); answer = []
+        while queue:
+            ch = queue.popleft(); answer.append(ch)
+            for nxt in graph[ch]:
+                indegree[nxt] -= 1
+                if indegree[nxt] == 0: queue.append(nxt)
+        return "".join(answer) if len(answer) == len(graph) else ""`,
+    "parallel-courses": String.raw`from collections import deque
+
+class Solution:
+    def minimumSemesters(self, n, relations):
+        graph = [[] for _ in range(n + 1)]; degree = [0] * (n + 1)
+        for prev, nxt in relations: graph[prev].append(nxt); degree[nxt] += 1
+        queue = deque(i for i in range(1, n + 1) if degree[i] == 0)
+        semesters = studied = 0
+        while queue:
+            semesters += 1
+            for _ in range(len(queue)):
+                node = queue.popleft(); studied += 1
+                for nxt in graph[node]:
+                    degree[nxt] -= 1
+                    if degree[nxt] == 0: queue.append(nxt)
+        return semesters if studied == n else -1`,
+    "clone-graph": String.raw`class Solution:
+    def cloneGraph(self, node):
+        if not node: return None
+        copies = {}
+        def dfs(current):
+            if current in copies: return copies[current]
+            clone = Node(current.val)
+            copies[current] = clone
+            clone.neighbors = [dfs(neighbor) for neighbor in current.neighbors]
+            return clone
+        return dfs(node)`,
+    "number-of-islands": String.raw`class Solution:
+    def numIslands(self, grid):
+        if not grid: return 0
+        rows, cols, islands = len(grid), len(grid[0]), 0
+        def dfs(r, c):
+            if r < 0 or r == rows or c < 0 or c == cols or grid[r][c] != "1": return
+            grid[r][c] = "0"
+            for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)): dfs(r + dr, c + dc)
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == "1": islands += 1; dfs(r, c)
+        return islands`,
+    "network-delay-time": String.raw`import heapq
+
+class Solution:
+    def networkDelayTime(self, times, n, k):
+        graph = [[] for _ in range(n + 1)]
+        for u, v, w in times: graph[u].append((v, w))
+        heap, dist = [(0, k)], {}
+        while heap:
+            time, node = heapq.heappop(heap)
+            if node in dist: continue
+            dist[node] = time
+            for nxt, weight in graph[node]:
+                if nxt not in dist: heapq.heappush(heap, (time + weight, nxt))
+        return max(dist.values()) if len(dist) == n else -1`,
+    "lru-cache": String.raw`from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+    def get(self, key):
+        if key not in self.cache: return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+    def put(self, key, value):
+        if key in self.cache: self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity: self.cache.popitem(last=False)`,
+    "time-map": String.raw`from bisect import bisect_right
+
+class TimeMap:
+    def __init__(self):
+        self.values = {}
+    def set(self, key, value, timestamp):
+        self.values.setdefault(key, []).append((timestamp, value))
+    def get(self, key, timestamp):
+        history = self.values.get(key, [])
+        index = bisect_right(history, (timestamp, chr(0x10ffff))) - 1
+        return history[index][1] if index >= 0 else ""`,
+    "rotting-oranges": String.raw`from collections import deque
+
+class Solution:
+    def orangesRotting(self, grid):
+        queue = deque(); fresh = 0
+        for r, row in enumerate(grid):
+            for c, value in enumerate(row):
+                if value == 2: queue.append((r, c))
+                elif value == 1: fresh += 1
+        minutes = 0
+        while queue and fresh:
+            for _ in range(len(queue)):
+                r, c = queue.popleft()
+                for dr, dc in ((1,0),(-1,0),(0,1),(0,-1)):
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < len(grid) and 0 <= nc < len(grid[0]) and grid[nr][nc] == 1:
+                        grid[nr][nc] = 2; fresh -= 1; queue.append((nr, nc))
+            minutes += 1
+        return minutes if fresh == 0 else -1`
+};
+
+function getEditorial(problem) {
+    const detail = editorialDetails[problem.id];
+    const referenceCode = referenceSolutions[problem.id];
+    if (!detail) {
+        return `<div class="editorial-kicker">Custom question</div><h3>${problem.title}</h3><h4>Solution strategy</h4><p>Start by identifying the input model, the required output, and the constraints. State a direct solution first, then choose a data structure or traversal that removes its bottleneck.</p><h4>Implementation plan</h4><ol><li>Choose a state invariant that captures the information needed for the next decision.</li><li>Handle boundary inputs before the main loop or traversal.</li><li>Dry-run one example, then state the resulting time and space complexity.</li></ol><div class="editorial-callout"><strong>Existing notes:</strong> ${problem.explanation || "Add an approach note when creating this question to make the editorial more specific."}</div>`;
+    }
+    return `<div class="editorial-kicker">Problem editorial</div><h3>${problem.title}</h3><h4>Key insight</h4><p>${detail.insight}</p><h4>Algorithm</h4><ol>${detail.steps.map(step => `<li>${step}</li>`).join("")}</ol><h4>Reference solution (Python)</h4><pre><code>${highlightPythonCode(referenceCode || problem.starterCode)}</code></pre><h4>Complexity</h4><p>${detail.complexity}</p><div class="editorial-callout"><strong>Watch for:</strong> ${detail.pitfall}</div>`;
+}
+
+function escapeEditorialCode(value) {
+    return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Lightweight syntax highlighting for static editorial snippets. The colours
+// intentionally match Monaco's built-in `vs-dark` Python token palette.
+function highlightPythonCode(value) {
+    const source = String(value || "");
+    const tokenPattern = /("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(#.*$)|\b(from|import|class|def|return|if|elif|else|for|while|in|not|and|or|is|None|True|False|continue|break|pass|with|as|lambda|try|except|finally|raise|yield)\b|\b([A-Za-z_]\w*)(?=\s*\()|\b(\d+(?:\.\d+)?)\b/gm;
+    let html = "";
+    let lastIndex = 0;
+    let match;
+
+    while ((match = tokenPattern.exec(source)) !== null) {
+        html += escapeEditorialCode(source.slice(lastIndex, match.index));
+        const token = escapeEditorialCode(match[0]);
+        let tokenClass = "";
+        if (match[1] || match[2]) tokenClass = "token-string";
+        else if (match[3]) tokenClass = "token-comment";
+        else if (match[4]) tokenClass = "token-keyword";
+        else if (match[5]) tokenClass = "token-function";
+        else if (match[6]) tokenClass = "token-number";
+        html += tokenClass ? `<span class="${tokenClass}">${token}</span>` : token;
+        lastIndex = tokenPattern.lastIndex;
+    }
+    return html + escapeEditorialCode(source.slice(lastIndex));
+}
+
 // Helper to get all favorites
 function getFavorites() {
     try {
@@ -1980,8 +2328,7 @@ function addCustomProblem(problem) {
 window.getFavorites = getFavorites;
 window.isFavorite = isFavorite;
 window.toggleFavorite = toggleFavorite;
+window.getEditorial = getEditorial;
 window.getProblems = getProblems;
 window.addCustomProblem = addCustomProblem;
 window.problems = getProblems();
-
-

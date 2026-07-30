@@ -100,6 +100,16 @@ header {
     gap: 1rem;
 }
 
+.logo-container {
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.logo-container:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 4px;
+}
+
 .btn-back-dashboard {
     display: none; /* Shown dynamically in Workspace view */
     background: rgba(255, 255, 255, 0.05);
@@ -455,6 +465,116 @@ header {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     color: #818cf8;
+}
+
+/* Editorial Tab Content */
+.editorial-container {
+    line-height: 1.65;
+    color: #cbd5e1;
+}
+
+.editorial-container h3 {
+    color: #fff;
+    margin: 0 0 0.4rem;
+    font-size: 1.3rem;
+}
+
+.editorial-container h4 {
+    color: #f8fafc;
+    margin: 1.35rem 0 0.45rem;
+    font-size: 1rem;
+}
+
+.editorial-container p {
+    margin: 0.35rem 0;
+}
+
+.editorial-container ol,
+.editorial-container ul {
+    padding-left: 1.35rem;
+    margin: 0.45rem 0;
+}
+
+.editorial-container li {
+    margin: 0.35rem 0;
+}
+
+.editorial-container pre {
+    position: relative;
+    margin: 0.75rem 0 1.1rem;
+    padding: 2.65rem 1.15rem 1.15rem;
+    overflow-x: auto;
+    border: 1px solid #3c3c3c;
+    border-radius: 8px;
+    background: #1e1e1e;
+    box-shadow: inset 3px 0 0 #007acc, 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.editorial-container pre::before {
+    content: "PYTHON 3 · REFERENCE SOLUTION";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.65rem 1.15rem;
+    border-bottom: 1px solid #3c3c3c;
+    border-radius: 8px 8px 0 0;
+    background: #252526;
+    color: #9cdcfe;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.editorial-container pre code {
+    color: #d4d4d4;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    white-space: pre;
+    text-shadow: 0 1px 0 rgba(15, 23, 42, 0.45);
+}
+
+/* Monaco vs-dark inspired Python token colours for editorial snippets. */
+.editorial-container .token-keyword {
+    color: #569cd6;
+}
+
+.editorial-container .token-function {
+    color: #dcdcaa;
+}
+
+.editorial-container .token-string {
+    color: #ce9178;
+}
+
+.editorial-container .token-comment {
+    color: #6a9955;
+}
+
+.editorial-container .token-number {
+    color: #b5cea8;
+}
+
+.editorial-kicker {
+    color: var(--secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.editorial-callout {
+    margin-top: 1.35rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(129, 140, 248, 0.35);
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.09);
+}
+
+.editorial-callout strong {
+    color: #c4b5fd;
 }
 
 /* Visualizer Sandbox Tab */
@@ -2092,6 +2212,3 @@ header {
 .summary-progress-fill.failure {
     background: linear-gradient(90deg, var(--difficulty-easy), var(--difficulty-hard));
 }
-
-
-

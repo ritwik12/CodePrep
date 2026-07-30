@@ -18,9 +18,9 @@
     <!-- Header / Navbar -->
     <header>
         <div class="header-left">
-            <div class="logo-container">
+            <div id="home-logo" class="logo-container" role="button" tabindex="0" aria-label="Go to CodePrep home">
                 <div class="logo-icon">&lt;/&gt;</div>
-                <h1 class="logo-text">CodePrep Python</h1>
+                <h1 class="logo-text">CodePrep</h1>
             </div>
         </div>
         <div class="nav-controls">
@@ -92,6 +92,7 @@
                 <nav class="pane-tabs">
                     <button class="tab-btn active" data-tab="problem-description">Description</button>
                     <button class="tab-btn" data-tab="problem-explanation">Approach & Template</button>
+                    <button class="tab-btn" data-tab="problem-editorial">Editorial</button>
                     <button id="tab-visualizer" class="tab-btn" data-tab="visualizer-sandbox">Visual Debugger</button>
                 </nav>
                 
@@ -112,40 +113,6 @@
                             </a>
                         </div>
 
-                        <!-- Interview Checklist Widget -->
-                        <div class="interview-checklist-card">
-                            <div class="checklist-header" id="checklist-toggle">
-                                <span>📋 Interview Stage Checklist</span>
-                                <span class="checklist-chevron" id="checklist-chevron">▼</span>
-                            </div>
-                            <div class="checklist-body" id="checklist-body">
-                                <label class="checklist-item">
-                                    <input type="checkbox" id="chk-clarify">
-                                    <span class="chk-label"><strong>Clarify:</strong> Ask questions, verify inputs/outputs & edge cases.</span>
-                                </label>
-                                <label class="checklist-item">
-                                    <input type="checkbox" id="chk-constraints">
-                                    <span class="chk-label"><strong>Constraints:</strong> Identify time/space limits and data ranges.</span>
-                                </label>
-                                <label class="checklist-item">
-                                    <input type="checkbox" id="chk-bruteforce">
-                                    <span class="chk-label"><strong>Brute Force:</strong> State a basic solution and its complexity.</span>
-                                </label>
-                                <label class="checklist-item">
-                                    <input type="checkbox" id="chk-optimal">
-                                    <span class="chk-label"><strong>Optimal Solution:</strong> Design and explain before coding.</span>
-                                </label>
-                                <label class="checklist-item">
-                                    <input type="checkbox" id="chk-dryrun">
-                                    <span class="chk-label"><strong>Dry Run:</strong> Trace code with sample input before running.</span>
-                                </label>
-                                <label class="checklist-item">
-                                    <input type="checkbox" id="chk-complexity">
-                                    <span class="chk-label"><strong>Complexity:</strong> Analyze final Big-O time and space.</span>
-                                </label>
-                            </div>
-                        </div>
-
                         <div id="problem-desc-container" class="problem-description-text">
                             <!-- Populated dynamically -->
                         </div>
@@ -164,7 +131,14 @@
                         </div>
                     </div>
 
-                    <!-- Tab 3: Visual Stack Sandbox Debugger -->
+                    <!-- Tab 3: Full problem editorial -->
+                    <div id="problem-editorial" class="tab-content">
+                        <div id="editorial-content" class="editorial-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Visual Stack Sandbox Debugger -->
                     <div id="visualizer-sandbox" class="tab-content">
                         <div class="visualizer-sandbox">
                             <div class="visualizer-input-group">

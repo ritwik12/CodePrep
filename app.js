@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setupEventListeners();
     setupNavigation();
     setupTimer();
-    setupChecklist();
     setupNotes();
     
     // Render initial views
@@ -170,11 +169,28 @@ function initMonaco() {
 // Setup View Switching Navigation
 function setupNavigation() {
     const btnDashboard = document.getElementById("tab-nav-dashboard");
+    const homeLogo = document.getElementById("home-logo");
     const btnBack = document.getElementById("btn-back");
 
     if (btnDashboard) {
         btnDashboard.addEventListener("click", () => {
             switchView("dashboard");
+        });
+    }
+
+    const goHome = () => {
+            pauseTimer();
+            isMockMode = false;
+            switchView("dashboard");
+    };
+
+    if (homeLogo) {
+        homeLogo.addEventListener("click", goHome);
+        homeLogo.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                goHome();
+            }
         });
     }
 
@@ -414,6 +430,11 @@ function setupTimer() {
 
 function startTimer() {
     if (timerRunning) return;
+    // A completed countdown leaves timeLeft at zero. Reset it before a user
+    // clicks the visible "Restart" control so the next interval can run.
+    if (timeLeft <= 0) {
+        resetTimer(3600);
+    }
     timerRunning = true;
     document.getElementById("btn-timer-toggle").innerText = "Pause";
     document.getElementById("btn-timer-toggle").classList.add("running");
@@ -719,8 +740,6 @@ function startRandomMockInterview() {
     // Open the workspace
     showWorkspaceView(randomProblem.id);
     
-    // Clear checklist for mock simulation
-    clearChecklistState(randomProblem.id);
     
     // Reset and auto-start the timer
     resetTimer(3600);
@@ -741,18 +760,14 @@ function showWorkspaceView(problemId) {
     document.getElementById("leetcode-link").href = currentProblem.leetcodeLink;
     document.getElementById("problem-desc-container").innerHTML = currentProblem.description;
     document.getElementById("explanation-content").innerHTML = currentProblem.explanation;
+    document.getElementById("editorial-content").innerHTML = window.getEditorial(currentProblem);
 
     // Update workspace star button
     updateWorkspaceStarBtn();
 
     // Load workspace state
     loadProblemCode(currentProblem);
-    loadChecklistState(currentProblem.id);
     loadNotesState(currentProblem.id);
-
-    // Default checklist panel to open
-    document.getElementById("checklist-body").classList.remove("collapsed");
-    document.getElementById("checklist-chevron").style.transform = "rotate(180deg)";
 
     // Set defaults/reset visualizer tab depending on category
     const visTabBtn = document.getElementById("tab-visualizer");
