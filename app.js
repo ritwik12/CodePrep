@@ -388,6 +388,31 @@ function setupEventListeners() {
         }
     });
 
+    // Restore deleted problems handler
+    const restoreBtn = document.getElementById("btn-restore-problems");
+    if (restoreBtn) {
+        restoreBtn.addEventListener("click", () => {
+            if (confirm("Are you sure you want to restore all deleted questions?")) {
+                window.restoreDeletedProblems();
+                renderDashboard();
+            }
+        });
+    }
+
+    // Workspace delete question handler
+    const deleteWsBtn = document.getElementById("btn-delete-workspace");
+    if (deleteWsBtn) {
+        deleteWsBtn.addEventListener("click", () => {
+            if (currentProblem && confirm(`Are you sure you want to delete "${currentProblem.title}"?`)) {
+                const title = currentProblem.title;
+                window.deleteProblem(currentProblem.id);
+                currentProblem = null;
+                switchView("dashboard");
+                renderDashboard();
+            }
+        });
+    }
+
     // Visualizer sandbox controls
     document.getElementById("btn-visualize").addEventListener("click", startVisualization);
     document.getElementById("visualizer-expr-input").addEventListener("keypress", (e) => {
@@ -579,6 +604,11 @@ function renderDashboard() {
     if (allCountEl) allCountEl.innerText = window.problems.length;
     if (favCountEl) favCountEl.innerText = window.getFavorites().length;
 
+    const restoreBtn = document.getElementById("btn-restore-problems");
+    if (restoreBtn) {
+        restoreBtn.style.display = window.hasDeletedProblems() ? "inline-flex" : "none";
+    }
+
     const query = document.getElementById("search-input").value.toLowerCase().trim();
     const category = document.getElementById("filter-category").value;
     const difficulty = document.getElementById("filter-difficulty").value;
@@ -633,9 +663,14 @@ function renderDashboard() {
                 <div style="flex-grow: 1; padding-right: 0.5rem;">
                     <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;">
                         <div class="problem-title">${p.title}</div>
-                        <button class="btn-star ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from Favourites' : 'Add to Favourites'}">
-                            ${isFav ? '★' : '☆'}
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 0.35rem;">
+                            <button class="btn-star ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from Favourites' : 'Add to Favourites'}">
+                                ${isFav ? '★' : '☆'}
+                            </button>
+                            <button class="btn-delete-card" title="Delete Question">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
                     </div>
                     <div style="font-size: 0.75rem; color: var(--secondary); margin-top: 0.25rem;">${p.category || 'Algorithms'}</div>
                 </div>
@@ -658,6 +693,21 @@ function renderDashboard() {
                 renderDashboard();
                 if (currentProblem && currentProblem.id === p.id) {
                     updateWorkspaceStarBtn();
+                }
+            });
+        }
+
+        const deleteBtn = card.querySelector(".btn-delete-card");
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (confirm(`Are you sure you want to delete "${p.title}"?`)) {
+                    window.deleteProblem(p.id);
+                    if (currentProblem && currentProblem.id === p.id) {
+                        currentProblem = null;
+                        switchView("dashboard");
+                    }
+                    renderDashboard();
                 }
             });
         }

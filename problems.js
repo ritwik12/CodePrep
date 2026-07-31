@@ -538,6 +538,197 @@ class Excel:
     ]
   },
   {
+    id: "design-excel-formula-engine",
+    title: "Design Excel Formula Engine",
+    difficulty: "Hard",
+    category: "Advanced LLD & Dependencies",
+    leetcodeLink: "https://leetcode.com/problems/design-excel-formula-engine/",
+    entryPoint: "Excel",
+    isClassDesign: true,
+    className: "Excel",
+    companyTags: ["Microsoft", "Google", "Amazon", "Uber"],
+    description: `
+      <p>Design an Excel-like spreadsheet that supports integer values and dynamic addition formulas.</p>
+      <p>Implement the <code>Excel</code> class:</p>
+      <ul>
+        <li><code>Excel()</code>: Initializes an empty spreadsheet. Unset cells default to an evaluated value of <code>0</code>.</li>
+        <li><code>set(cell, value)</code>: Sets the given cell. If <code>value</code> is an integer string (e.g. <code>"25"</code>), the cell stores that constant. If <code>value</code> starts with <code>'='</code>, it represents a formula consisting of additions (<code>+</code>) of integer constants and cell references. Setting a new value or formula replaces any previous contents of the cell.</li>
+        <li><code>get(cell)</code>: Returns the current evaluated value of the cell. If the cell has not been set, returns <code>0</code>.</li>
+      </ul>
+
+      <p>A formula:</p>
+      <ul>
+        <li>Always starts with <code>'='</code>.</li>
+        <li>Supports only the <code>+</code> operator.</li>
+        <li>Operands can be either integer constants or cell references.</li>
+        <li>Cell references consist of one or more uppercase English letters followed by one or more digits (e.g. <code>A1</code>, <code>Z10</code>, <code>AA5</code>, <code>ZA100</code>, <code>ABC999</code>). Unset referenced cells evaluate to <code>0</code>.</li>
+        <li>Formulas automatically evaluate to reflect the latest values whenever any referenced cell changes.</li>
+      </ul>
+
+      <h5>Example 1:</h5>
+      <pre>
+<strong>Input:</strong>
+["Excel", "set", "set", "get", "set", "set", "set", "get", "set", "get"]
+[[], ["A1", "2"], ["B100", "2"], ["A1"], ["AA10", "3"], ["ZA10", "3"], ["B100", "=A1+B100+2+5+ZA10"], ["B100"], ["A1", "10"], ["B100"]]
+
+<strong>Output:</strong>
+[null, null, null, 2, null, null, null, 14, null, 22]
+
+<strong>Explanation:</strong>
+Excel excel = new Excel();
+
+excel.set("A1", "2");
+excel.set("B100", "2");
+
+excel.get("A1");              // returns 2
+
+excel.set("AA10", "3");
+excel.set("ZA10", "3");
+
+excel.set("B100", "=A1+B100+2+5+ZA10");
+// B100 = 2 + 2 + 2 + 5 + 3 = 14
+
+excel.get("B100");            // returns 14
+
+excel.set("A1", "10");
+
+excel.get("B100");            // returns 22
+// B100 = 10 + 2 + 2 + 5 + 3 = 22
+      </pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li>Cell names consist of one or more uppercase English letters (<code>A-Z</code>) followed by one or more digits.</li>
+        <li>Column names may be arbitrarily long (<code>A</code>, <code>Z</code>, <code>AA</code>, <code>AB</code>, <code>ZZ</code>, <code>AAA</code>, ...).</li>
+        <li>Row numbers are positive integers.</li>
+        <li>Formulas contain only integer constants, valid cell references, and the <code>+</code> operator.</li>
+        <li>There are no circular dependencies.</li>
+        <li>All intermediate and final results fit in a signed 32-bit integer.</li>
+        <li>At most <code>10<sup>4</sup></code> calls will be made to <code>set</code> and <code>get</code>.</li>
+      </ul>
+    `,
+    starterCode: `class Excel:
+    def __init__(self):
+        pass
+
+    def set(self, cell: str, value: str) -> None:
+        pass
+
+    def get(self, cell: str) -> int:
+        return 0`,
+    testCases: [
+      {
+        input: '{"commands": ["Excel", "set", "get"], "arguments": [[], ["A1", "5"], ["A1"]]}',
+        expected: [null, null, 5]
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "get"], "arguments": [[], ["A1", "2"], ["B1", "=A1+3+5"], ["B1"]]}',
+        expected: [null, null, null, 10]
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "get", "set", "get"], "arguments": [[], ["A1", "2"], ["B1", "=A1+5"], ["B1"], ["A1", "10"], ["B1"]]}',
+        expected: [null, null, null, 7, null, 15]
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "set", "get", "set", "get"], "arguments": [[], ["A1", "2"], ["B1", "3"], ["C1", "=A1+B1+5"], ["C1"], ["A1", "10"], ["C1"]]}',
+        expected: [null, null, null, null, 10, null, 18]
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "get"], "arguments": [[], ["AA10", "7"], ["ZA100", "=AA10+3"], ["ZA100"]]}',
+        expected: [null, null, null, 10],
+        hidden: true
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "set", "get", "set", "get"], "arguments": [[], ["A1", "2"], ["B1", "=A1+3"], ["C1", "=B1+5"], ["C1"], ["A1", "10"], ["C1"]]}',
+        expected: [null, null, null, null, 10, null, 18],
+        hidden: true
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "set", "get", "set", "get"], "arguments": [[], ["A1", "2"], ["B1", "=A1+5"], ["B1", "100"], ["B1"], ["A1", "10"], ["B1"]]}',
+        expected: [null, null, null, null, 100, null, 100],
+        hidden: true
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "get", "set", "get"], "arguments": [[], ["A1", "10"], ["B1", "5"], ["B1"], ["B1", "=A1+5"], ["B1"]]}',
+        expected: [null, null, null, 5, null, 15],
+        hidden: true
+      },
+      {
+        input: '{"commands": ["Excel", "set", "get"], "arguments": [[], ["A1", "=1+2+3+4+5"], ["A1"]]}',
+        expected: [null, null, 15],
+        hidden: true
+      },
+      {
+        input: '{"commands": ["Excel", "set", "set", "set", "set", "get", "set", "get"], "arguments": [[], ["A1", "2"], ["B100", "2"], ["AA10", "3"], ["ZA10", "=A1+B100+2+5+AA10"], ["ZA10"], ["A1", "10"], ["ZA10"]]}',
+        expected: [null, null, null, null, null, 14, null, 22],
+        hidden: true
+      }
+    ],
+    explanation: `
+      <h4>Dynamic Spreadsheet Dependency Evaluation</h4>
+      <p>Each cell stores either an integer value or a raw formula string. When <code>get(cell)</code> is called, any formulas are evaluated recursively across their referenced cell dependencies. Because circular dependencies do not exist, this traversal evaluates the DAG of references to return the updated cell value.</p>
+    `,
+    followUps: [
+      "How would you handle or detect circular dependencies (e.g., A1 = B1 + 1 and B1 = A1 + 1)?",
+      "How would you optimize `get` calls using dependency graph invalidation/caching?",
+      "How would you extend this engine to support range sum operations (e.g. `A1:B10`) and operators like `-`, `*`, `/`?"
+    ]
+  },
+  {
+    id: "minimum-window-subsequence",
+    title: "727. Minimum Window Subsequence",
+    difficulty: "Hard",
+    category: "Sliding Window",
+    leetcodeLink: "https://leetcode.com/problems/minimum-window-subsequence/",
+    entryPoint: "minWindow",
+    companyTags: ["Google", "Meta", "Amazon", "Microsoft"],
+    description: `
+      <p>Given strings <code>s1</code> and <code>s2</code>, return <em>the minimum contiguous substring of <code>s1</code> such that <code>s2</code> is a subsequence of that substring</em>.</p>
+      <p>If there is no such window in <code>s1</code> that covers all characters in <code>s2</code>, return the empty string <code>""</code>. If there are multiple such minimum-length windows, return the one with the <strong>left-most starting index</strong>.</p>
+      
+      <h5>Example 1:</h5>
+      <pre>
+<strong>Input:</strong> s1 = "abcdebdde", s2 = "bde"
+<strong>Output:</strong> "bcde"
+<strong>Explanation:</strong> 
+"bcde" is the minimum window substring because "bde" is a subsequence of "bcde".
+"bdde" is also a window substring with "bde" as a subsequence, but "bcde" occurs before "bdde" (left-most starting index).
+      </pre>
+
+      <h5>Example 2:</h5>
+      <pre>
+<strong>Input:</strong> s1 = "jmeqqaqaqq", s2 = "u"
+<strong>Output:</strong> ""
+      </pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= s1.length <= 2 * 10<sup>4</sup></code></li>
+        <li><code>1 <= s2.length <= 100</code></li>
+        <li><code>s1</code> and <code>s2</code> consist of lowercase English letters.</li>
+      </ul>
+    `,
+    starterCode: `class Solution:
+    def minWindow(self, s1: str, s2: str) -> str:
+        # Write your Python solution here
+        pass`,
+    testCases: [
+      { input: '["abcdebdde", "bde"]', expected: "bcde" },
+      { input: '["jmeqqaqaqq", "u"]', expected: "" },
+      { input: '["fgrqrfaqawrt", "fqa"]', expected: "faqa" },
+      { input: '["aaabbbccc", "abc"]', expected: "abbbc", hidden: true }
+    ],
+    explanation: `
+      <h4>Two-Pointer Forward & Backward Optimization</h4>
+      <p>When matching <code>s2</code> in <code>s1</code>, scan forward to find an end position matching the full subsequence <code>s2</code>. Once found, scan backward from that end index to find the tightest starting position for <code>s2[0]</code>. Update the minimum window result, then resume searching immediately after the start index.</p>
+    `,
+    followUps: [
+      "Can you solve this using 2D or 1D Dynamic Programming?",
+      "What is the time complexity difference between the DP approach and the two-pointer approach?",
+      "How does this problem differ from LeetCode 76 (Minimum Window Substring)?"
+    ]
+  },
+  {
     id: "lru-cache",
     title: "146. LRU Cache",
     difficulty: "Medium",
@@ -1953,6 +2144,21 @@ const editorialDetails = {
         insight: "Store formula references rather than only their current total, then evaluate them recursively when a cell is read.",
         steps: ["Keep each cell as either a literal value or a frequency map of referenced cells.", "Expand ranges into individual references, preserving duplicate references as counts.", "Evaluate a formula by summing count × recursively evaluated dependency."], complexity: "Depends on referenced cells per get; storage is proportional to stored references.", pitfall: "Overwriting a formula must discard its old references."
     },
+    "design-excel-formula-engine": {
+        insight: "Store cell values as either integers or raw formula strings, then evaluate formulas dynamically using recursive DFS over cell dependencies.",
+        steps: ["Store cells in a hash map mapping coordinates to integer values or formula strings.", "In get(cell), if the cell is missing return 0; if it is an integer return it directly.", "If it is a formula string starting with '=', strip '=' and split operands by '+'. Recursively evaluate cell references using get(ref) and sum with integer constants."], complexity: "O(1) set; O(depth) get per cell; O(N) space for N stored cells.", pitfall: "Clearing/overwriting a cell formula must replace the stored raw value so old dependencies are no longer referenced."
+    },
+    "minimum-window-subsequence": {
+        insight: "Once a forward pass finds all characters of s2 in order, a backward pass shrinks the left boundary to find the shortest contiguous substring ending at that position.",
+        steps: [
+            "Scan s1 with pointer i looking for matches of s2[0].",
+            "When s2[0] is found, advance a pointer through s1 while matching consecutive characters of s2 until s2 is fully matched.",
+            "Scan backward from the end match to locate the rightmost valid start for s2[0], minimizing the window length.",
+            "Record the best window and reset the search pointer to start + 1."
+        ],
+        complexity: "O(n1 * n2) worst-case time, O(1) space for two pointers (or O(n1 * n2) DP).",
+        pitfall: "Do not move the main pointer to the end after a match; start the next search right after the start of the current window to catch overlapping candidates."
+    },
     "lru-cache": {
         insight: "A hash map finds a key in O(1), while a doubly linked list moves that key to the most-recent end in O(1).",
         steps: ["Use sentinel head and tail nodes; keep most recent beside head.", "On get, return -1 if missing; otherwise remove and reinsert the node at the front.", "On put, update-and-promote an existing key or add a new node and evict tail.prev if over capacity."], complexity: "O(1) average time per operation and O(capacity) space.", pitfall: "Use a doubly linked list so an arbitrary mapped node can be removed in constant time."
@@ -2175,6 +2381,69 @@ class Solution:
             for nxt, weight in graph[node]:
                 if nxt not in dist: heapq.heappush(heap, (time + weight, nxt))
         return max(dist.values()) if len(dist) == n else -1`,
+    "design-excel-formula-engine": String.raw`class Excel:
+    def __init__(self):
+        self.cells = {}
+
+    def set(self, cell: str, value: str) -> None:
+        if value.startswith('='):
+            self.cells[cell] = value
+        else:
+            self.cells[cell] = int(value)
+
+    def get(self, cell: str) -> int:
+        if cell not in self.cells:
+            return 0
+        val = self.cells[cell]
+        if isinstance(val, int):
+            return val
+        
+        expr = val[1:]
+        tokens = expr.split('+')
+        total = 0
+        for token in tokens:
+            token = token.strip()
+            if not token:
+                continue
+            if token[0].isalpha():
+                total += self.get(token)
+            else:
+                total += int(token)
+        return total`,
+    "minimum-window-subsequence": String.raw`class Solution:
+    def minWindow(self, s1: str, s2: str) -> str:
+        m, n = len(s1), len(s2)
+        i = 0
+        min_len = float('inf')
+        min_window = ""
+        
+        while i < m:
+            if s1[i] == s2[0]:
+                j = 0
+                k = i
+                while k < m and j < n:
+                    if s1[k] == s2[j]:
+                        j += 1
+                    k += 1
+                
+                if j == n:
+                    end = k - 1
+                    j = n - 1
+                    start = end
+                    while start >= 0 and j >= 0:
+                        if s1[start] == s2[j]:
+                            j -= 1
+                        start -= 1
+                    start += 1
+                    
+                    if (end - start + 1) < min_len:
+                        min_len = end - start + 1
+                        min_window = s1[start:end+1]
+                    
+                    i = start
+            i += 1
+            
+        return min_window`,
     "lru-cache": String.raw`from collections import OrderedDict
 
 class LRUCache:
@@ -2304,7 +2573,19 @@ function getProblems() {
     } catch (e) {
         console.error("Error reading custom problems", e);
     }
-    return [...defaultProblems, ...customProblems];
+    let all = [...defaultProblems, ...customProblems];
+    try {
+        const deleted = localStorage.getItem("deleted_problems");
+        if (deleted) {
+            const deletedIds = JSON.parse(deleted);
+            if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+                all = all.filter(p => !deletedIds.includes(p.id));
+            }
+        }
+    } catch (e) {
+        console.error("Error reading deleted problems", e);
+    }
+    return all;
 }
 
 // Helper to save a new custom problem
@@ -2318,9 +2599,78 @@ function addCustomProblem(problem) {
         custom = custom.filter(p => p.id !== problem.id);
         custom.push(problem);
         localStorage.setItem("custom_problems", JSON.stringify(custom));
+        
+        // Remove from deleted_problems if it was previously marked deleted
+        let deleted = [];
+        const storedDeleted = localStorage.getItem("deleted_problems");
+        if (storedDeleted) {
+            deleted = JSON.parse(storedDeleted).filter(id => id !== problem.id);
+            localStorage.setItem("deleted_problems", JSON.stringify(deleted));
+        }
         return true;
     } catch (e) {
         console.error("Error saving custom problem", e);
+        return false;
+    }
+}
+
+// Helper to delete a problem
+function deleteProblem(problemId) {
+    try {
+        // 1. Remove from custom_problems if present
+        let custom = [];
+        const storedCustom = localStorage.getItem("custom_problems");
+        if (storedCustom) {
+            custom = JSON.parse(storedCustom).filter(p => p.id !== problemId);
+            localStorage.setItem("custom_problems", JSON.stringify(custom));
+        }
+
+        // 2. Add to deleted_problems
+        let deleted = [];
+        const storedDeleted = localStorage.getItem("deleted_problems");
+        if (storedDeleted) {
+            deleted = JSON.parse(storedDeleted);
+        }
+        if (!deleted.includes(problemId)) {
+            deleted.push(problemId);
+        }
+        localStorage.setItem("deleted_problems", JSON.stringify(deleted));
+
+        // 3. Remove favorite status if favorited
+        let favs = getFavorites();
+        if (favs.includes(problemId)) {
+            favs = favs.filter(id => id !== problemId);
+            localStorage.setItem("favorite_problems", JSON.stringify(favs));
+        }
+
+        window.problems = getProblems();
+        return true;
+    } catch (e) {
+        console.error("Error deleting problem", e);
+        return false;
+    }
+}
+
+// Helper to restore all deleted problems
+function restoreDeletedProblems() {
+    try {
+        localStorage.removeItem("deleted_problems");
+        window.problems = getProblems();
+        return true;
+    } catch (e) {
+        console.error("Error restoring deleted problems", e);
+        return false;
+    }
+}
+
+// Helper to check if any problems are deleted
+function hasDeletedProblems() {
+    try {
+        const stored = localStorage.getItem("deleted_problems");
+        if (!stored) return false;
+        const arr = JSON.parse(stored);
+        return Array.isArray(arr) && arr.length > 0;
+    } catch (e) {
         return false;
     }
 }
@@ -2331,4 +2681,8 @@ window.toggleFavorite = toggleFavorite;
 window.getEditorial = getEditorial;
 window.getProblems = getProblems;
 window.addCustomProblem = addCustomProblem;
+window.deleteProblem = deleteProblem;
+window.restoreDeletedProblems = restoreDeletedProblems;
+window.hasDeletedProblems = hasDeletedProblems;
 window.problems = getProblems();
+
