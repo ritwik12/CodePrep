@@ -2203,6 +2203,132 @@ class DriverPaymentTracker:
       "How would you scale this tracker across multiple nodes in a distributed system with high throughput?",
       "How can you avoid floating-point rounding errors when aggregating large total payments?"
     ]
+  },
+  {
+    id: "transactional-key-value-store",
+    title: "Transactional Key-Value Store",
+    difficulty: "Hard",
+    category: "Data Structure Design",
+    leetcodeLink: "https://leetcode.com/discuss/post/4985212/rippling-phonescreen-keyvalue-datastore-fi5hl/",
+    entryPoint: "KVStore",
+    isClassDesign: true,
+    className: "KVStore",
+    companyTags: ["Rippling", "Bloomberg"],
+    description: `
+      <p>Design and implement an in-memory key-value store supporting single and nested transactions.</p>
+      
+      <p>Implement the <code>KVStore</code> class:</p>
+      <ul>
+        <li><code>__init__()</code>: Initializes the key-value store.</li>
+        <li><code>set(key: str, value: str) -> None</code>: Stores or updates the value associated with <code>key</code>. If inside an active transaction, the write only affects the current transaction layer.</li>
+        <li><code>get(key: str) -> Optional[str]</code>: Returns the visible value of <code>key</code>. Searches from the newest active transaction down to the main store. Returns <code>None</code> if the key does not exist or was deleted.</li>
+        <li><code>delete(key: str) -> None</code>: Deletes <code>key</code> from the store or marks it as deleted in the current transaction layer (using a tombstone).</li>
+        <li><code>begin() -> None</code>: Starts a new transaction (or nested transaction level).</li>
+        <li><code>commit() -> bool</code>: Permanently applies changes in the current transaction layer. If nested, merges into parent transaction. Returns <code>true</code> if committed, or <code>false</code> if no active transaction.</li>
+        <li><code>rollback() -> bool</code>: Discards all changes made in the current transaction layer. Returns <code>true</code> if rollback succeeds, or <code>false</code> if no active transaction.</li>
+      </ul>
+
+      <h5>Example 1:</h5>
+      <pre>
+KVStore kv = new KVStore();
+kv.set("a", "1");
+kv.begin();
+kv.get("a");      // Returns "1"
+kv.set("a", "2");
+kv.get("a");      // Returns "2"
+kv.rollback();   // Rollbacks transaction
+kv.get("a");      // Returns "1"
+      </pre>
+
+      <h5>Example 2 (Nested Transactions):</h5>
+      <pre>
+KVStore kv = new KVStore();
+kv.begin();
+kv.set("a", "1");
+kv.begin();       // Nested transaction
+kv.set("a", "2");
+kv.get("a");      // Returns "2"
+kv.commit();     // Merges nested transaction into outer transaction
+kv.get("a");      // Returns "2"
+kv.rollback();   // Rolls back outer transaction
+kv.get("a");      // Returns null
+      </pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= key.length, value.length <= 100</code></li>
+        <li>At most <code>10<sup>5</sup></code> operations called.</li>
+        <li><code>set</code>, <code>get</code>, and <code>delete</code> run in <code>O(1)</code> average time complexity (with <code>O(depth)</code> for <code>get</code> during nested transactions).</li>
+      </ul>
+    `,
+    starterCode: `from typing import Optional
+
+class KVStore:
+    def __init__(self):
+        pass
+
+    def set(self, key: str, value: str) -> None:
+        pass
+
+    def get(self, key: str) -> Optional[str]:
+        return None
+
+    def delete(self, key: str) -> None:
+        pass
+
+    def begin(self) -> None:
+        pass
+
+    def commit(self) -> bool:
+        return False
+
+    def rollback(self) -> bool:
+        return False`,
+    testCases: [
+      {
+        input: '{"commands": ["KVStore", "set", "get", "delete", "get"], "arguments": [[], ["x", "10"], ["x"], ["x"], ["x"]]}',
+        expected: [null, null, "10", null, null]
+      },
+      {
+        input: '{"commands": ["KVStore", "set", "begin", "get", "set", "get", "rollback", "get"], "arguments": [[], ["a", "1"], [], ["a"], ["a", "2"], ["a"], [], ["a"]]}',
+        expected: [null, null, null, "1", null, "2", true, "1"]
+      },
+      {
+        input: '{"commands": ["KVStore", "set", "begin", "set", "commit", "get"], "arguments": [[], ["x", "10"], [], ["x", "20"], [], ["x"]]}',
+        expected: [null, null, null, null, true, "20"]
+      },
+      {
+        input: '{"commands": ["KVStore", "begin", "set", "delete", "get", "rollback", "get"], "arguments": [[], [], ["a", "1"], ["a"], ["a"], [], ["a"]]}',
+        expected: [null, null, null, null, null, true, null]
+      },
+      {
+        input: '{"commands": ["KVStore", "begin", "set", "begin", "set", "get", "commit", "get", "rollback", "get"], "arguments": [[], [], ["a", "1"], [], ["a", "2"], ["a"], [], ["a"], [], ["a"]]}',
+        expected: [null, null, null, null, null, "2", true, "2", true, null],
+        hidden: true
+      }
+    ],
+    explanation: `
+      <h4>Stack of Hash Maps & Tombstone Deletes</h4>
+      <p>To support nested transactions with isolated reads and rollbacks:</p>
+      <ul>
+        <li>Main store (<code>store</code>): A hash map storing committed key-value pairs.</li>
+        <li>Transaction stack (<code>transactions</code>): A list of hash maps representing active nested transaction layers.</li>
+      </ul>
+      <p><strong>Key Mechanics:</strong></p>
+      <ul>
+        <li><code>begin()</code>: Pushes a new empty hash map onto the transaction stack.</li>
+        <li><code>set(key, value)</code>: Writes to the topmost hash map on the stack if in a transaction, otherwise writes directly to the main store.</li>
+        <li><code>delete(key)</code>: Inside a transaction, writes a <strong>tombstone</strong> (<code>None</code>) to the top layer to mark key deletion without altering outer scopes. Outside a transaction, deletes from the main store.</li>
+        <li><code>get(key)</code>: Iterates backward through the transaction stack. The first layer containing <code>key</code> dictates the result (returning <code>None</code> if it matches a tombstone). If not found in any layer, falls back to main store.</li>
+        <li><code>commit()</code>: Pops the top layer. If parent transaction layers remain, merges changes (using <code>dict.update()</code>). If it was the outermost transaction, applies changes to main store (deleting tombstoned keys).</li>
+        <li><code>rollback()</code>: Simply pops and discards the topmost transaction layer.</li>
+      </ul>
+    `,
+    followUps: [
+      "How would you support transaction isolation levels (e.g. Serializable, Read Committed) in a multi-threaded system?",
+      "How would you persist this key-value store to disk using Write-Ahead Logging (WAL) and AOF?",
+      "How can you optimize get(key) lookup speed when transaction nesting depth becomes large?"
+    ]
   }
 ];
 
@@ -2386,6 +2512,18 @@ const editorialDetails = {
         ],
         complexity: "addDriver: O(1), recordDelivery: O(log N), getTotalCost: O(1), payUpToTime: O(k log N), getUnpaidCost: O(1). Space: O(N).",
         pitfall: "Iterating through all deliveries to calculate total/unpaid costs on the fly would result in O(N) queries, violating the O(1) requirement."
+    },
+    "transactional-key-value-store": {
+        insight: "Maintaining a stack of hash maps allows isolated transaction writes and instant rollback by popping the stack, while tombstones handle deletes cleanly across nested scopes.",
+        steps: [
+            "Maintain a main hash map for committed data and a stack of hash maps for active nested transactions.",
+            "In set() and delete(), write to the top layer (using None as a tombstone for delete).",
+            "In get(), traverse the stack from top to bottom before checking the main store.",
+            "In commit(), pop the top layer and merge it into its parent layer (or into the main store if it's the outermost transaction).",
+            "In rollback(), pop and discard the top transaction layer."
+        ],
+        complexity: "set: O(1), get: O(1) avg / O(depth), delete: O(1), begin: O(1), commit: O(k), rollback: O(1). Space: O(N + uncommitted changes).",
+        pitfall: "Failing to store tombstones on delete inside a transaction allows deleted keys to erroneously fallback and read values from outer transaction layers or the main store."
     }
 };
 
@@ -2635,7 +2773,52 @@ class DriverPaymentTracker:
                 self.unpaid_cost = 0.0
 
     def getUnpaidCost(self) -> float:
-        return round(self.unpaid_cost, 4)`
+        return round(self.unpaid_cost, 4)`,
+    "transactional-key-value-store": String.raw`class KVStore:
+    def __init__(self):
+        self.store = {}
+        self.transactions = []
+
+    def set(self, key: str, value: str) -> None:
+        if self.transactions:
+            self.transactions[-1][key] = value
+        else:
+            self.store[key] = value
+
+    def get(self, key: str):
+        for tx in reversed(self.transactions):
+            if key in tx:
+                return tx[key]
+        return self.store.get(key, None)
+
+    def delete(self, key: str) -> None:
+        if self.transactions:
+            self.transactions[-1][key] = None
+        else:
+            self.store.pop(key, None)
+
+    def begin(self) -> None:
+        self.transactions.append({})
+
+    def commit(self) -> bool:
+        if not self.transactions:
+            return False
+        top_tx = self.transactions.pop()
+        if self.transactions:
+            self.transactions[-1].update(top_tx)
+        else:
+            for key, val in top_tx.items():
+                if val is None:
+                    self.store.pop(key, None)
+                else:
+                    self.store[key] = val
+        return True
+
+    def rollback(self) -> bool:
+        if not self.transactions:
+            return False
+        self.transactions.pop()
+        return True`
 };
 
 function getEditorial(problem) {
