@@ -2329,6 +2329,421 @@ class KVStore:
       "How would you persist this key-value store to disk using Write-Ahead Logging (WAL) and AOF?",
       "How can you optimize get(key) lookup speed when transaction nesting depth becomes large?"
     ]
+  },
+  {
+    id: "music-analytics",
+    title: "Music Analytics System",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "MusicAnalytics",
+    isClassDesign: true,
+    className: "MusicAnalytics",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design a <code>MusicAnalytics</code> system to record song plays, track play statistics, and retrieve user playback history.</p>
+      <p>Implement the <code>MusicAnalytics</code> class:</p>
+      <ul>
+        <li><code>addSong(songId: str) -> None</code>: Registers a new song in the system.</li>
+        <li><code>playSong(userId: str, songId: str) -> None</code>: Records a play event by a user for a song.</li>
+        <li><code>getAnalytics() -> List[List]</code>: Returns a list of <code>[songId, totalPlays, uniqueUsersCount]</code> sorted by <code>songId</code>.</li>
+        <li><code>getRecentlyPlayed(userId: str, k: Optional[int] = None) -> List[str]</code>: Returns up to <code>k</code> most recent unique songs played by the user (most recent first). If <code>k</code> is None, returns all recently played songs.</li>
+      </ul>
+    `,
+    starterCode: `from typing import List, Optional
+
+class MusicAnalytics:
+    def __init__(self):
+        pass
+
+    def addSong(self, songId: str) -> None:
+        pass
+
+    def playSong(self, userId: str, songId: str) -> None:
+        pass
+
+    def getAnalytics(self) -> List[List]:
+        return []
+
+    def getRecentlyPlayed(self, userId: str, k: Optional[int] = None) -> List[str]:
+        return []`,
+    testCases: [
+      {
+        input: '{"commands": ["MusicAnalytics", "addSong", "addSong", "playSong", "playSong", "playSong", "getAnalytics", "getRecentlyPlayed"], "arguments": [[], ["s1"], ["s2"], ["u1", "s1"], ["u1", "s2"], ["u2", "s1"], [], ["u1", 2]]}',
+        expected: [null, null, null, null, null, null, [["s1", 2, 2], ["s2", 1, 1]], ["s2", "s1"]]
+      }
+    ],
+    explanation: `
+      <h4>Hash Maps & Deduplicated Play History</h4>
+      <p>Maintain play counts and unique user sets per song, along with an ordered list of played songs per user.</p>
+    `,
+    followUps: [
+      "How would you scale this to handle millions of streaming log events per second?",
+      "How can you compute top 10 most played songs overall in O(1) time?"
+    ]
+  },
+  {
+    id: "currency-conversion",
+    title: "Currency Conversion Graph",
+    difficulty: "Medium",
+    category: "Graphs & BFS/DFS",
+    leetcodeLink: "",
+    entryPoint: "CurrencyConverter",
+    isClassDesign: true,
+    className: "CurrencyConverter",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design a <code>CurrencyConverter</code> system that maintains directed exchange rates between currencies and converts requested amounts.</p>
+      <p>Implement the <code>CurrencyConverter</code> class:</p>
+      <ul>
+        <li><code>addRate(fromCurr: str, toCurr: str, rate: float) -> None</code>: Adds an exchange rate from <code>fromCurr</code> to <code>toCurr</code> (and reciprocal rate <code>1 / rate</code>).</li>
+        <li><code>convert(fromCurr: str, toCurr: str, amount: float) -> float</code>: Converts <code>amount</code> from <code>fromCurr</code> to <code>toCurr</code> using shortest path multiplication. Returns <code>-1.0</code> if conversion path does not exist.</li>
+      </ul>
+    `,
+    starterCode: `class CurrencyConverter:
+    def __init__(self):
+        pass
+
+    def addRate(self, fromCurr: str, toCurr: str, rate: float) -> None:
+        pass
+
+    def convert(self, fromCurr: str, toCurr: str, amount: float) -> float:
+        return -1.0`,
+    testCases: [
+      {
+        input: '{"commands": ["CurrencyConverter", "addRate", "addRate", "addRate", "convert", "convert", "convert"], "arguments": [[], ["USD", "INR", 80.0], ["USD", "EUR", 0.9], ["EUR", "GBP", 0.85], ["USD", "INR", 10.0], ["USD", "GBP", 100.0], ["INR", "JPY", 10.0]]}',
+        expected: [null, null, null, null, 800.0, 76.5, -1.0]
+      }
+    ],
+    explanation: `
+      <h4>Graph & Breadth-First Search (BFS)</h4>
+      <p>Model currencies as graph nodes and conversion rates as weighted edges. Perform BFS to compute exchange rate product.</p>
+    `,
+    followUps: [
+      "How would you detect inconsistent conversion rates (cycles where path product != 1.0)?",
+      "How would you cache conversion results for frequent queries?"
+    ]
+  },
+  {
+    id: "peak-active-drivers",
+    title: "Peak Active Drivers",
+    difficulty: "Medium",
+    category: "Arrays & Sweep Line",
+    leetcodeLink: "",
+    entryPoint: "maxActiveDrivers",
+    isClassDesign: false,
+    companyTags: ["Rippling"],
+    description: `
+      <p>Given a list of driver active logs <code>logs</code> where each entry is <code>[driverId, start, end]</code> representing Unix timestamps of active shift periods, return the maximum number of drivers active simultaneously at any timestamp.</p>
+    `,
+    starterCode: `from typing import List
+
+class Solution:
+    def maxActiveDrivers(self, logs: List[List[int]]) -> int:
+        return 0`,
+    testCases: [
+      { input: '[[[1, 10, 20], [2, 15, 25], [3, 18, 30]]]', expected: 3 },
+      { input: '[[[1, 1, 5], [2, 5, 10], [3, 10, 15]]]', expected: 1 },
+      { input: '[[[1, 1, 10], [2, 2, 8], [3, 3, 6], [4, 4, 5]]]', expected: 4 }
+    ],
+    explanation: `
+      <h4>Sweep Line Algorithm</h4>
+      <p>Convert shift intervals into <code>(timestamp, +1)</code> start events and <code>(timestamp, -1)</code> end events. Sort events by time and track max running active sum.</p>
+    `,
+    followUps: [
+      "How would you handle continuous streaming shift updates in real time?"
+    ]
+  },
+  {
+    id: "wage-calculator",
+    title: "Worker Wage Calculator",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "WageCalculator",
+    isClassDesign: true,
+    className: "WageCalculator",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design a <code>WageCalculator</code> to record worker shifts and calculate total, elapsed, and remaining shift costs.</p>
+      <p>Implement the <code>WageCalculator</code> class:</p>
+      <ul>
+        <li><code>addShift(workerId: int, hourlyRate: float, startTime: int, endTime: int) -> None</code></li>
+        <li><code>totalCost() -> float</code>: Returns total cost of all shifts.</li>
+        <li><code>costTill(time: int) -> float</code>: Returns total cost accrued up to <code>time</code> (including partial ongoing shifts).</li>
+        <li><code>remainingCost(time: int) -> float</code>: Returns remaining unaccrued shift cost after <code>time</code>.</li>
+      </ul>
+    `,
+    starterCode: `class WageCalculator:
+    def __init__(self):
+        pass
+
+    def addShift(self, workerId: int, hourlyRate: float, startTime: int, endTime: int) -> None:
+        pass
+
+    def totalCost(self) -> float:
+        return 0.0
+
+    def costTill(self, time: int) -> float:
+        return 0.0
+
+    def remainingCost(self, time: int) -> float:
+        return 0.0`,
+    testCases: [
+      {
+        input: '{"commands": ["WageCalculator", "addShift", "addShift", "totalCost", "costTill", "remainingCost"], "arguments": [[], [1, 20.0, 0, 3600], [2, 40.0, 1800, 5400], [], [3600], [3600]]}',
+        expected: [null, null, null, 60.0, 40.0, 20.0]
+      }
+    ],
+    explanation: `
+      <h4>Interval Overlap Calculation</h4>
+      <p>Calculate exact time overlaps for completed and partial shift durations.</p>
+    `,
+    followUps: [
+      "How would you optimize costTill query time to O(log N) using prefix sums / segment tree?"
+    ]
+  },
+  {
+    id: "expense-aggregator",
+    title: "Expense Aggregator",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "ExpenseAggregator",
+    isClassDesign: true,
+    className: "ExpenseAggregator",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design an <code>ExpenseAggregator</code> system that processes company expenses and supports dynamic aggregations.</p>
+      <p>Implement the <code>ExpenseAggregator</code> class:</p>
+      <ul>
+        <li><code>addExpense(employee: str, trip: str, category: str, amount: float) -> None</code></li>
+        <li><code>groupByEmployee() -> Dict[str, float]</code></li>
+        <li><code>groupByTrip() -> Dict[str, float]</code></li>
+        <li><code>groupByCategory() -> Dict[str, float]</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import Dict
+
+class ExpenseAggregator:
+    def __init__(self):
+        pass
+
+    def addExpense(self, employee: str, trip: str, category: str, amount: float) -> None:
+        pass
+
+    def groupByEmployee(self) -> Dict[str, float]:
+        return {}
+
+    def groupByTrip(self) -> Dict[str, float]:
+        return {}
+
+    def groupByCategory(self) -> Dict[str, float]:
+        return {}`,
+    testCases: [
+      {
+        input: '{"commands": ["ExpenseAggregator", "addExpense", "addExpense", "addExpense", "groupByEmployee", "groupByTrip", "groupByCategory"], "arguments": [[], ["Alice", "TripA", "Hotel", 200.0], ["Alice", "TripA", "Meal", 50.0], ["Bob", "TripB", "Hotel", 300.0], [], [], []]}',
+        expected: [null, null, null, null, {"Alice": 250.0, "Bob": 300.0}, {"TripA": 250.0, "TripB": 300.0}, {"Hotel": 500.0, "Meal": 50.0}]
+      }
+    ],
+    explanation: `
+      <h4>Multi-Index Hash Tables</h4>
+      <p>Maintain separate hash maps for employee, trip, and category running totals for O(1) accumulation and O(K) output retrieval.</p>
+    `,
+    followUps: [
+      "How would you handle currency conversion when expenses are recorded in different currencies?"
+    ]
+  },
+  {
+    id: "expense-policy-engine",
+    title: "Expense Policy Engine",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "ExpensePolicyEngine",
+    isClassDesign: true,
+    className: "ExpensePolicyEngine",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design an <code>ExpensePolicyEngine</code> rule engine to validate corporate expenses against limits and day restrictions.</p>
+      <p>Implement the <code>ExpensePolicyEngine</code> class:</p>
+      <ul>
+        <li><code>addCategoryLimit(category: str, maxAmount: float) -> None</code></li>
+        <li><code>addDayRestriction(category: str, allowedDays: List[str]) -> None</code></li>
+        <li><code>validateExpense(category: str, amount: float, dayOfWeek: str) -> bool</code></li>
+        <li><code>rejectReason(category: str, amount: float, dayOfWeek: str) -> str</code>: Returns <code>"Valid"</code>, <code>"EXCEEDS_LIMIT"</code>, or <code>"INVALID_DAY"</code>.</li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class ExpensePolicyEngine:
+    def __init__(self):
+        pass
+
+    def addCategoryLimit(self, category: str, maxAmount: float) -> None:
+        pass
+
+    def addDayRestriction(self, category: str, allowedDays: List[str]) -> None:
+        pass
+
+    def validateExpense(self, category: str, amount: float, dayOfWeek: str) -> bool:
+        return False
+
+    def rejectReason(self, category: str, amount: float, dayOfWeek: str) -> str:
+        return "Valid"`,
+    testCases: [
+      {
+        input: '{"commands": ["ExpensePolicyEngine", "addCategoryLimit", "addDayRestriction", "validateExpense", "rejectReason", "rejectReason"], "arguments": [[], ["Hotel", 500.0], ["Taxi", ["Mon", "Tue", "Wed", "Thu", "Fri"]], ["Hotel", 400.0, "Mon"], ["Hotel", 600.0, "Mon"], ["Taxi", 30.0, "Sat"]]}',
+        expected: [null, null, null, true, "EXCEEDS_LIMIT", "INVALID_DAY"]
+      }
+    ],
+    explanation: `
+      <h4>Configurable Rule Pipeline</h4>
+      <p>Store rule constraints in category hash maps and evaluate rules sequentially.</p>
+    `,
+    followUps: [
+      "How would you extend this to support monthly/annual employee spend caps?"
+    ]
+  },
+  {
+    id: "vote-tracking-system",
+    title: "Real-Time Vote Tracking System",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "VoteTracker",
+    isClassDesign: true,
+    className: "VoteTracker",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design a real-time <code>VoteTracker</code> system supporting upvotes, downvotes, vote revocations, and top article queries.</p>
+      <p>Implement the <code>VoteTracker</code> class:</p>
+      <ul>
+        <li><code>upvote(userId: str, articleId: str) -> None</code></li>
+        <li><code>downvote(userId: str, articleId: str) -> None</code></li>
+        <li><code>removeVote(userId: str, articleId: str) -> None</code></li>
+        <li><code>getTopArticles(k: int) -> List[str]</code>: Returns top <code>k</code> article IDs ordered by score descending (tie-broken by article ID).</li>
+      </ul>
+    `,
+    starterCode: `from typing import List
+
+class VoteTracker:
+    def __init__(self):
+        pass
+
+    def upvote(self, userId: str, articleId: str) -> None:
+        pass
+
+    def downvote(self, userId: str, articleId: str) -> None:
+        pass
+
+    def removeVote(self, userId: str, articleId: str) -> None:
+        pass
+
+    def getTopArticles(self, k: int) -> List[str]:
+        return []`,
+    testCases: [
+      {
+        input: '{"commands": ["VoteTracker", "upvote", "upvote", "upvote", "downvote", "getTopArticles"], "arguments": [[], ["u1", "artA"], ["u2", "artA"], ["u1", "artB"], ["u3", "artB"], [2]]}',
+        expected: [null, null, null, null, null, ["artA", "artB"]]
+      }
+    ],
+    explanation: `
+      <h4>Hash Map Vote State Tracking</h4>
+      <p>Store user-article vote states <code>(userId, articleId) -> state</code> to ensure correct net score changes (+2 when switching from downvote to upvote).</p>
+    `,
+    followUps: [
+      "How can you achieve O(1) top-K querying using a bucket heap or doubly linked list?"
+    ]
+  },
+  {
+    id: "music-player",
+    title: "Music Player System",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "MusicPlayer",
+    isClassDesign: true,
+    className: "MusicPlayer",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design a <code>MusicPlayer</code> supporting song queues, playback navigation (next/previous), favorites, and recently played history.</p>
+      <p>Implement the <code>MusicPlayer</code> class:</p>
+      <ul>
+        <li><code>addSong(songId: str) -> None</code></li>
+        <li><code>queueSong(songId: str) -> None</code></li>
+        <li><code>playNext() -> Optional[str]</code></li>
+        <li><code>playPrev() -> Optional[str]</code></li>
+        <li><code>favorite(songId: str) -> None</code></li>
+        <li><code>getRecentlyPlayed(k: int) -> List[str]</code></li>
+      </ul>
+    `,
+    starterCode: `from typing import List, Optional
+
+class MusicPlayer:
+    def __init__(self):
+        pass
+
+    def addSong(self, songId: str) -> None:
+        pass
+
+    def queueSong(self, songId: str) -> None:
+        pass
+
+    def playNext(self) -> Optional[str]:
+        return None
+
+    def playPrev(self) -> Optional[str]:
+        return None
+
+    def favorite(self, songId: str) -> None:
+        pass
+
+    def getRecentlyPlayed(self, k: int) -> List[str]:
+        return []`,
+    testCases: [
+      {
+        input: '{"commands": ["MusicPlayer", "addSong", "addSong", "queueSong", "queueSong", "playNext", "playNext", "playPrev", "getRecentlyPlayed"], "arguments": [[], ["s1"], ["s2"], ["s1"], ["s2"], [], [], [], [2]]}',
+        expected: [null, null, null, null, null, "s1", "s2", "s1", ["s1", "s2"]]
+      }
+    ],
+    explanation: `
+      <h4>Queue & History Stack Architecture</h4>
+      <p>Combine a FIFO queue for upcoming songs and a LIFO stack for playback history to enable seamless back-and-forth navigation.</p>
+    `,
+    followUps: [
+      "How would you implement a shuffle feature while retaining undo/previous capability?"
+    ]
+  },
+  {
+    id: "poker-hand-comparison",
+    title: "Poker Hand Evaluation & Comparison",
+    difficulty: "Hard",
+    category: "Implementation & Combinatorics",
+    leetcodeLink: "",
+    entryPoint: "compareHands",
+    isClassDesign: false,
+    companyTags: ["Rippling"],
+    description: `
+      <p>Implement a function <code>compareHands(hand1: str, hand2: str) -> int</code> to compare two 5-card poker hands.</p>
+      <p>Returns <code>1</code> if <code>hand1</code> wins, <code>-1</code> if <code>hand2</code> wins, or <code>0</code> if tie.</p>
+      <p>Hand Ranks (highest to lowest): Royal Flush, Straight Flush, Four of a Kind, Full House, Flush, Straight, Three of a Kind, Two Pair, One Pair, High Card.</p>
+    `,
+    starterCode: `class Solution:
+    def compareHands(self, hand1: str, hand2: str) -> int:
+        return 0`,
+    testCases: [
+      { input: '["AH KH QH JH TH", "2C 2D 2H 3S 3D"]', expected: 1 },
+      { input: '["7S 8S 9S TS JS", "AH AD AC AS 2H"]', expected: 1 },
+      { input: '["2H 3H 4H 5H 7H", "2D 3D 4D 5D 7D"]', expected: 0 }
+    ],
+    explanation: `
+      <h4>Poker Hand Categorization & Tie-Breaking Ranks</h4>
+      <p>Score each hand into a tuple <code>(category, sorted_tiebreaker_ranks)</code> and compare tuples directly.</p>
+    `,
+    followUps: [
+      "How would you evaluate 7-card Texas Hold'em hands or hands with wildcards?"
+    ]
   }
 ];
 
@@ -2524,6 +2939,60 @@ const editorialDetails = {
         ],
         complexity: "set: O(1), get: O(1) avg / O(depth), delete: O(1), begin: O(1), commit: O(k), rollback: O(1). Space: O(N + uncommitted changes).",
         pitfall: "Failing to store tombstones on delete inside a transaction allows deleted keys to erroneously fallback and read values from outer transaction layers or the main store."
+    },
+    "music-analytics": {
+        insight: "Track play statistics per song and user history using hash maps for O(1) updates.",
+        steps: ["Use play_counts and unique_users maps for song statistics.", "Maintain user_history list for recently played queries."],
+        complexity: "O(1) playSong, O(N log N) getAnalytics.",
+        pitfall: "Handle user deduplication when returning recent songs."
+    },
+    "currency-conversion": {
+        insight: "Model conversion rates as a weighted directed graph and run BFS to find the rate product.",
+        steps: ["Add forward and reciprocal edges.", "Use BFS with path multiplication to find target currency."],
+        complexity: "O(V + E) per conversion query.",
+        pitfall: "Remember to add inverse rates (1/rate) when adding edges."
+    },
+    "peak-active-drivers": {
+        insight: "Sweep line events sort start (+1) and end (-1) timestamps to track active driver counts.",
+        steps: ["Create start and end events for each shift.", "Sort events by time.", "Track running active count and record maximum."],
+        complexity: "O(N log N) time and O(N) space.",
+        pitfall: "Sort tie-breaker correctly for overlapping start/end times."
+    },
+    "wage-calculator": {
+        insight: "Calculate time interval overlaps to compute total, accrued, and remaining shift costs.",
+        steps: ["Store shifts as interval tuples.", "Compute accrued cost by checking shift start/end relative to target timestamp."],
+        complexity: "O(N) per cost query.",
+        pitfall: "Handle partial ongoing shift calculations correctly."
+    },
+    "expense-aggregator": {
+        insight: "Maintain multi-index accumulators for employee, trip, and category running totals.",
+        steps: ["Update employee, trip, and category totals on addExpense.", "Return dictionary copies for aggregations."],
+        complexity: "O(1) addExpense, O(K) group queries.",
+        pitfall: "Convert floating point values cleanly."
+    },
+    "expense-policy-engine": {
+        insight: "Store category limits and day restrictions in hash tables for sequential evaluation.",
+        steps: ["Check amount limit for category.", "Check allowed days restriction for category.", "Return specific violation reason."],
+        complexity: "O(1) validation per expense.",
+        pitfall: "Ensure correct precedence of violation reason reporting."
+    },
+    "vote-tracking-system": {
+        insight: "Store user-article vote states to compute net score changes correctly.",
+        steps: ["Track previous user vote per article.", "Compute net score delta upon vote change.", "Sort articles by score descending."],
+        complexity: "O(1) vote operations, O(A log A) top articles.",
+        pitfall: "A vote switch from -1 to +1 increases score by +2, not +1."
+    },
+    "music-player": {
+        insight: "Pair a FIFO queue for upcoming songs with a LIFO stack for playback history.",
+        steps: ["Pop from queue on playNext and push current to history.", "Pop from history on playPrev and push current to queue."],
+        complexity: "O(1) navigation operations.",
+        pitfall: "Handle empty queue and empty history gracefully."
+    },
+    "poker-hand-comparison": {
+        insight: "Evaluate 5-card hands into (category_rank, tie_breaker_values) tuples for direct comparison.",
+        steps: ["Check flush and straight conditions.", "Count rank frequencies.", "Construct tuple score and compare."],
+        complexity: "O(1) per hand evaluation.",
+        pitfall: "Handle A-2-3-4-5 wheel straight (Ace low) correctly."
     }
 };
 
@@ -2818,7 +3287,249 @@ class DriverPaymentTracker:
         if not self.transactions:
             return False
         self.transactions.pop()
-        return True`
+        return True`,
+    "music-analytics": String.raw`from collections import defaultdict
+
+class MusicAnalytics:
+    def __init__(self):
+        self.songs = set()
+        self.play_counts = defaultdict(int)
+        self.unique_users = defaultdict(set)
+        self.user_history = defaultdict(list)
+
+    def addSong(self, songId: str) -> None:
+        self.songs.add(songId)
+
+    def playSong(self, userId: str, songId: str) -> None:
+        if songId not in self.songs:
+            self.songs.add(songId)
+        self.play_counts[songId] += 1
+        self.unique_users[songId].add(userId)
+        self.user_history[userId].append(songId)
+
+    def getAnalytics(self) -> list:
+        res = []
+        for song in sorted(self.songs):
+            res.append([song, self.play_counts[song], len(self.unique_users[song])])
+        return res
+
+    def getRecentlyPlayed(self, userId: str, k: int = None) -> list:
+        history = self.user_history.get(userId, [])
+        recent = list(dict.fromkeys(reversed(history)))
+        return recent[:k] if k is not None else recent`,
+    "currency-conversion": String.raw`from collections import defaultdict, deque
+
+class CurrencyConverter:
+    def __init__(self):
+        self.graph = defaultdict(dict)
+
+    def addRate(self, fromCurr: str, toCurr: str, rate: float) -> None:
+        self.graph[fromCurr][toCurr] = float(rate)
+        self.graph[toCurr][fromCurr] = 1.0 / float(rate)
+
+    def convert(self, fromCurr: str, toCurr: str, amount: float) -> float:
+        if fromCurr not in self.graph or toCurr not in self.graph:
+            return -1.0
+        if fromCurr == toCurr:
+            return float(amount)
+        queue = deque([(fromCurr, float(amount))])
+        visited = {fromCurr}
+        while queue:
+            curr, curr_amt = queue.popleft()
+            if curr == toCurr:
+                return round(curr_amt, 4)
+            for nxt, rate in self.graph[curr].items():
+                if nxt not in visited:
+                    visited.add(nxt)
+                    queue.append((nxt, curr_amt * rate))
+        return -1.0`,
+    "peak-active-drivers": String.raw`class Solution:
+    def maxActiveDrivers(self, logs: list) -> int:
+        events = []
+        for driver_id, start, end in logs:
+            events.append((start, 1))
+            events.append((end, -1))
+        events.sort(key=lambda x: (x[0], x[1]))
+        max_active = 0
+        curr = 0
+        for time, change in events:
+            curr += change
+            max_active = max(max_active, curr)
+        return max_active`,
+    "wage-calculator": String.raw`class WageCalculator:
+    def __init__(self):
+        self.shifts = []
+
+    def addShift(self, workerId: int, hourlyRate: float, startTime: int, endTime: int) -> None:
+        self.shifts.append((workerId, float(hourlyRate), startTime, endTime))
+
+    def totalCost(self) -> float:
+        total = sum((end - start) * rate / 3600.0 for _, rate, start, end in self.shifts)
+        return round(total, 4)
+
+    def costTill(self, time: int) -> float:
+        total = 0.0
+        for _, rate, start, end in self.shifts:
+            if time >= end:
+                total += (end - start) * rate / 3600.0
+            elif time > start:
+                total += (time - start) * rate / 3600.0
+        return round(total, 4)
+
+    def remainingCost(self, time: int) -> float:
+        return round(self.totalCost() - self.costTill(time), 4)`,
+    "expense-aggregator": String.raw`from collections import defaultdict
+
+class ExpenseAggregator:
+    def __init__(self):
+        self.by_emp = defaultdict(float)
+        self.by_trip = defaultdict(float)
+        self.by_cat = defaultdict(float)
+
+    def addExpense(self, employee: str, trip: str, category: str, amount: float) -> None:
+        amt = float(amount)
+        self.by_emp[employee] += amt
+        self.by_trip[trip] += amt
+        self.by_cat[category] += amt
+
+    def groupByEmployee(self) -> dict:
+        return dict(self.by_emp)
+
+    def groupByTrip(self) -> dict:
+        return dict(self.by_trip)
+
+    def groupByCategory(self) -> dict:
+        return dict(self.by_cat)`,
+    "expense-policy-engine": String.raw`class ExpensePolicyEngine:
+    def __init__(self):
+        self.limits = {}
+        self.day_restrictions = {}
+
+    def addCategoryLimit(self, category: str, maxAmount: float) -> None:
+        self.limits[category] = float(maxAmount)
+
+    def addDayRestriction(self, category: str, allowedDays: list) -> None:
+        self.day_restrictions[category] = set(allowedDays)
+
+    def validateExpense(self, category: str, amount: float, dayOfWeek: str) -> bool:
+        return self.rejectReason(category, amount, dayOfWeek) == "Valid"
+
+    def rejectReason(self, category: str, amount: float, dayOfWeek: str) -> str:
+        if category in self.limits and float(amount) > self.limits[category]:
+            return "EXCEEDS_LIMIT"
+        if category in self.day_restrictions and dayOfWeek not in self.day_restrictions[category]:
+            return "INVALID_DAY"
+        return "Valid"`,
+    "vote-tracking-system": String.raw`from collections import defaultdict
+
+class VoteTracker:
+    def __init__(self):
+        self.user_votes = {}
+        self.scores = defaultdict(int)
+
+    def upvote(self, userId: str, articleId: str) -> None:
+        prev = self.user_votes.get((userId, articleId), 0)
+        if prev != 1:
+            self.user_votes[(userId, articleId)] = 1
+            self.scores[articleId] += (1 - prev)
+
+    def downvote(self, userId: str, articleId: str) -> None:
+        prev = self.user_votes.get((userId, articleId), 0)
+        if prev != -1:
+            self.user_votes[(userId, articleId)] = -1
+            self.scores[articleId] += (-1 - prev)
+
+    def removeVote(self, userId: str, articleId: str) -> None:
+        if (userId, articleId) in self.user_votes:
+            prev = self.user_votes.pop((userId, articleId))
+            self.scores[articleId] -= prev
+
+    def getTopArticles(self, k: int) -> list:
+        sorted_articles = sorted(self.scores.keys(), key=lambda a: (-self.scores[a], a))
+        return sorted_articles[:k]`,
+    "music-player": String.raw`from collections import deque
+
+class MusicPlayer:
+    def __init__(self):
+        self.songs = set()
+        self.queue = deque()
+        self.history = []
+        self.current = None
+        self.favorites = set()
+
+    def addSong(self, songId: str) -> None:
+        self.songs.add(songId)
+
+    def queueSong(self, songId: str) -> None:
+        self.queue.append(songId)
+
+    def playNext(self):
+        if not self.queue:
+            return None
+        song = self.queue.popleft()
+        if self.current:
+            self.history.append(self.current)
+        self.current = song
+        return song
+
+    def playPrev(self):
+        if not self.history:
+            return None
+        if self.current:
+            self.queue.appendleft(self.current)
+        song = self.history.pop()
+        self.current = song
+        return song
+
+    def favorite(self, songId: str) -> None:
+        if songId in self.favorites:
+            self.favorites.remove(songId)
+        else:
+            self.favorites.add(songId)
+
+    def getRecentlyPlayed(self, k: int) -> list:
+        recent = []
+        if self.current:
+            recent.append(self.current)
+        recent.extend(reversed(self.history))
+        return recent[:k]`,
+    "poker-hand-comparison": String.raw`from collections import defaultdict
+
+class Solution:
+    def compareHands(self, hand1: str, hand2: str) -> int:
+        VALUES = {'2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, 'T':10, 'J':11, 'Q':12, 'K':13, 'A':14}
+        def score_hand(hand_str):
+            cards = hand_str.strip().split()
+            ranks = sorted([VALUES[c[0]] for c in cards], reverse=True)
+            suits = [c[1] for c in cards]
+            is_flush = len(set(suits)) == 1
+            is_straight = len(set(ranks)) == 5 and (ranks[0] - ranks[4] == 4)
+            if not is_straight and set(ranks) == {14, 5, 4, 3, 2}:
+                is_straight = True
+                ranks = [5, 4, 3, 2, 1]
+            counts = defaultdict(int)
+            for r in ranks: counts[r] += 1
+            freq = sorted([(cnt, r) for r, cnt in counts.items()], reverse=True)
+            if is_straight and is_flush: return (8, ranks)
+            if freq[0][0] == 4: return (7, [freq[0][1], freq[1][1]])
+            if freq[0][0] == 3 and freq[1][0] == 2: return (6, [freq[0][1], freq[1][1]])
+            if is_flush: return (5, ranks)
+            if is_straight: return (4, ranks)
+            if freq[0][0] == 3:
+                kickers = [r for cnt, r in freq if cnt == 1]
+                return (3, [freq[0][1]] + kickers)
+            if freq[0][0] == 2 and freq[1][0] == 2:
+                kicker = freq[2][1]
+                pairs = sorted([freq[0][1], freq[1][1]], reverse=True)
+                return (2, pairs + [kicker])
+            if freq[0][0] == 2:
+                kickers = [r for cnt, r in freq if cnt == 1]
+                return (1, [freq[0][1]] + kickers)
+            return (0, ranks)
+        s1, s2 = score_hand(hand1), score_hand(hand2)
+        if s1 > s2: return 1
+        if s1 < s2: return -1
+        return 0`
 };
 
 function getEditorial(problem) {
