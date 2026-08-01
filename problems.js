@@ -2098,6 +2098,111 @@ class Codec:
     followUps: [
       "Compare compact binary encoding vs string token serialization."
     ]
+  },
+  {
+    id: "driver-payment-tracker",
+    title: "Driver Payment Tracker",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "DriverPaymentTracker",
+    isClassDesign: true,
+    className: "DriverPaymentTracker",
+    companyTags: ["Rippling"],
+    description: `
+      <p>Design and implement an in-memory <code>DriverPaymentTracker</code> system supporting real-time delivery recording, payment calculation, and tracking unpaid earnings.</p>
+      
+      <p>Implement the <code>DriverPaymentTracker</code> class:</p>
+      <ul>
+        <li><code>__init__()</code>: Initializes the payment tracker.</li>
+        <li><code>addDriver(driverId: int, hourlyRate: float) -> None</code>: Registers a driver with a fixed hourly rate.</li>
+        <li><code>recordDelivery(driverId: int, startTime: int, endTime: int) -> None</code>: Records a completed delivery for a registered driver. Delivery payment is computed as <code>hourlyRate × (endTime - startTime) / 3600</code>.</li>
+        <li><code>getTotalCost() -> float</code>: Returns the total cost of all recorded deliveries (paid and unpaid). Must optimize for frequent queries.</li>
+        <li><code>payUpToTime(time: int) -> None</code>: Marks all unpaid recorded deliveries with <code>endTime <= time</code> as paid. A delivery must never be paid more than once.</li>
+        <li><code>getUnpaidCost() -> float</code>: Returns the total unpaid delivery cost. Must optimize for frequent queries.</li>
+      </ul>
+
+      <h5>Example 1:</h5>
+      <pre>
+DriverPaymentTracker tracker = new DriverPaymentTracker();
+tracker.addDriver(1, 36.0);                     // Driver 1 registered with rate $36/hr ($0.01/sec)
+tracker.recordDelivery(1, 1000, 4600);          // Duration 3600s (1 hr) -> Cost = $36.0
+tracker.getTotalCost();                         // Returns 36.0
+tracker.getUnpaidCost();                        // Returns 36.0
+tracker.payUpToTime(4000);                      // Delivery ended at 4600 > 4000 -> remains unpaid
+tracker.getUnpaidCost();                        // Returns 36.0
+tracker.payUpToTime(5000);                      // Delivery ended at 4600 <= 5000 -> marked as paid
+tracker.getUnpaidCost();                        // Returns 0.0
+tracker.getTotalCost();                         // Returns 36.0
+      </pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>startTime</code> and <code>endTime</code> are Unix timestamps (seconds) with <code>startTime < endTime</code>.</li>
+        <li>Maximum delivery duration: 3 hours (10,800 seconds).</li>
+        <li>Up to <code>10<sup>5</sup></code> API calls.</li>
+        <li>Driver always exists when recording a delivery.</li>
+      </ul>
+
+      <h5>Target Complexities:</h5>
+      <ul>
+        <li><code>addDriver</code>: <code>O(1)</code></li>
+        <li><code>recordDelivery</code>: <code>O(log N)</code> or better</li>
+        <li><code>getTotalCost</code>: <code>O(1)</code></li>
+        <li><code>payUpToTime</code>: <code>O(k log N)</code> where <code>k</code> is the number of newly paid deliveries</li>
+        <li><code>getUnpaidCost</code>: <code>O(1)</code></li>
+      </ul>
+    `,
+    starterCode: `import heapq
+
+class DriverPaymentTracker:
+    def __init__(self):
+        pass
+
+    def addDriver(self, driverId: int, hourlyRate: float) -> None:
+        pass
+
+    def recordDelivery(self, driverId: int, startTime: int, endTime: int) -> None:
+        pass
+
+    def getTotalCost(self) -> float:
+        return 0.0
+
+    def payUpToTime(self, time: int) -> None:
+        pass
+
+    def getUnpaidCost(self) -> float:
+        return 0.0`,
+    testCases: [
+      {
+        input: '{"commands": ["DriverPaymentTracker", "addDriver", "recordDelivery", "getTotalCost", "getUnpaidCost", "payUpToTime", "getUnpaidCost", "payUpToTime", "getUnpaidCost", "getTotalCost"], "arguments": [[], [1, 36.0], [1, 1000, 4600], [], [], [4000], [], [5000], [], []]}',
+        expected: [null, null, null, 36.0, 36.0, null, 36.0, null, 0.0, 36.0]
+      },
+      {
+        input: '{"commands": ["DriverPaymentTracker", "addDriver", "addDriver", "recordDelivery", "recordDelivery", "getTotalCost", "getUnpaidCost", "payUpToTime", "getUnpaidCost", "payUpToTime", "getUnpaidCost"], "arguments": [[], [1, 60.0], [2, 120.0], [1, 0, 1800], [2, 100, 1000], [], [], [1200], [], [2000], []]}',
+        expected: [null, null, null, null, null, 60.0, 60.0, null, 30.0, null, 0.0]
+      },
+      {
+        input: '{"commands": ["DriverPaymentTracker", "addDriver", "recordDelivery", "payUpToTime", "payUpToTime", "getUnpaidCost", "getTotalCost"], "arguments": [[], [5, 40.0], [5, 500, 2300], [3000], [4000], [], []]}',
+        expected: [null, null, null, null, null, 0.0, 20.0],
+        hidden: true
+      }
+    ],
+    explanation: `
+      <h4>Heap-based Min-Priority Queue for Unpaid Deliveries</h4>
+      <p>To meet the tight time complexity requirements for frequent cost queries and bulk payments, we maintain:</p>
+      <ul>
+        <li><code>drivers</code> hash map: Stores <code>driverId -> hourlyRate</code> for <code>O(1)</code> rate lookups.</li>
+        <li><code>totalCost</code> and <code>unpaidCost</code> accumulators: Updated on every delivery insertion and payment, giving <code>O(1)</code> performance for <code>getTotalCost()</code> and <code>getUnpaidCost()</code>.</li>
+        <li><code>unpaidHeap</code>: A min-heap storing tuples of <code>(endTime, deliveryCost)</code> ordered by completion timestamp.</li>
+      </ul>
+      <p>When <code>payUpToTime(time)</code> is called, we repeatedly pop from the min-heap while the smallest <code>endTime <= time</code> and subtract each popped delivery cost from <code>unpaidCost</code>. This processes <code>k</code> paid deliveries in <code>O(k log N)</code> time.</p>
+    `,
+    followUps: [
+      "How would you handle delivery cancellations or driver rate changes mid-delivery?",
+      "How would you scale this tracker across multiple nodes in a distributed system with high throughput?",
+      "How can you avoid floating-point rounding errors when aggregating large total payments?"
+    ]
   }
 ];
 
@@ -2270,6 +2375,17 @@ const editorialDetails = {
     "serialize-and-deserialize-binary-tree": {
         insight: "Null markers make a tree traversal unambiguous, allowing the decoder to rebuild exactly the same shape.",
         steps: ["Serialize with preorder, writing a marker for every missing child.", "Consume the token stream in preorder during deserialization.", "Create a node for a value, then recursively build its left and right subtrees."], complexity: "O(n) time and O(n) output/storage.", pitfall: "Without null markers, different tree shapes can serialize to the same values."
+    },
+    "driver-payment-tracker": {
+        insight: "Maintaining running accumulators for total/unpaid costs along with a min-heap of unpaid deliveries ordered by endTime provides O(1) cost lookups and O(k log N) bulk payment processing.",
+        steps: [
+            "Store driver rates in a hash map for O(1) lookup.",
+            "Maintain total_cost and unpaid_cost accumulators.",
+            "Upon recordDelivery, compute cost = rate * (endTime - startTime) / 3600. Add cost to both accumulators and push (endTime, cost) to min-heap.",
+            "In payUpToTime(t), pop deliveries from heap while top.endTime <= t, subtracting each cost from unpaid_cost."
+        ],
+        complexity: "addDriver: O(1), recordDelivery: O(log N), getTotalCost: O(1), payUpToTime: O(k log N), getUnpaidCost: O(1). Space: O(N).",
+        pitfall: "Iterating through all deliveries to calculate total/unpaid costs on the fly would result in O(N) queries, violating the O(1) requirement."
     }
 };
 
@@ -2487,7 +2603,39 @@ class Solution:
                     if 0 <= nr < len(grid) and 0 <= nc < len(grid[0]) and grid[nr][nc] == 1:
                         grid[nr][nc] = 2; fresh -= 1; queue.append((nr, nc))
             minutes += 1
-        return minutes if fresh == 0 else -1`
+        return minutes if fresh == 0 else -1`,
+    "driver-payment-tracker": String.raw`import heapq
+
+class DriverPaymentTracker:
+    def __init__(self):
+        self.drivers = {}
+        self.total_cost = 0.0
+        self.unpaid_cost = 0.0
+        self.unpaid_heap = []  # stores tuples of (endTime, cost)
+
+    def addDriver(self, driverId: int, hourlyRate: float) -> None:
+        self.drivers[driverId] = float(hourlyRate)
+
+    def recordDelivery(self, driverId: int, startTime: int, endTime: int) -> None:
+        rate = self.drivers[driverId]
+        duration = endTime - startTime
+        cost = (duration * rate) / 3600.0
+        self.total_cost += cost
+        self.unpaid_cost += cost
+        heapq.heappush(self.unpaid_heap, (endTime, cost))
+
+    def getTotalCost(self) -> float:
+        return round(self.total_cost, 4)
+
+    def payUpToTime(self, time: int) -> None:
+        while self.unpaid_heap and self.unpaid_heap[0][0] <= time:
+            _, cost = heapq.heappop(self.unpaid_heap)
+            self.unpaid_cost -= cost
+            if self.unpaid_cost < 1e-9:
+                self.unpaid_cost = 0.0
+
+    def getUnpaidCost(self) -> float:
+        return round(self.unpaid_cost, 4)`
 };
 
 function getEditorial(problem) {
