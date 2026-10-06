@@ -1128,12 +1128,17 @@ else:
                 
                 ClassEntity = globals().get(class_name_str)
                 if ClassEntity is None:
+                    for candidate in [class_name_str, "WordSearch", "DocumentSearch", "WordSearchIndex", "PhraseSearch", "DocumentPhraseSearch", "PhraseSearchIndex"]:
+                        if candidate in globals():
+                            ClassEntity = globals()[candidate]
+                            break
+                if ClassEntity is None:
                     raise Exception(f"Class '{class_name_str}' not found in your code.")
                 
                 for k in range(len(commands)):
                     cmd = commands[k]
                     args = arguments[k]
-                    if cmd == class_name_str:
+                    if cmd == class_name_str or k == 0:
                         obj = ClassEntity(*args)
                         outputs.append(None)
                     else:

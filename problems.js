@@ -2744,6 +2744,186 @@ class MusicPlayer:
     followUps: [
       "How would you evaluate 7-card Texas Hold'em hands or hands with wildcards?"
     ]
+  },
+  {
+    id: "word-search-across-documents",
+    title: "Word Search Across Documents",
+    difficulty: "Medium",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "WordSearch",
+    isClassDesign: true,
+    className: "WordSearch",
+    companyTags: ["Google", "Meta", "Amazon"],
+    description: `
+      <p>You are given a list of documents. Each document has a unique ID and contains a sequence of words.</p>
+      <p>Implement the <code>WordSearch</code> class:</p>
+      <ul>
+        <li><code>__init__(documents: List[Tuple[int, List[str]]])</code>: Initializes the search engine with the given documents. Each document is a pair of <code>(doc_id, words)</code>.</li>
+        <li><code>search(word: str) -> List[int]</code>: Returns the IDs of all documents containing the given <code>word</code>. The search should be <strong>case-insensitive</strong>.</li>
+      </ul>
+
+      <h5>Example 1:</h5>
+      <pre>
+<strong>Input:</strong>
+documents = [
+    (1, ["this", "is", "a", "document"]),
+    (2, ["this", "is", "another", "document"]),
+    (3, ["hello", "world"])
+]
+
+search("this")     → [1, 2]
+search("document") → [1, 2]
+search("hello")    → [3]
+search("foo")      → []
+      </pre>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= documents.length <= 10<sup>4</sup></code></li>
+        <li><code>1 <= words.length <= 10<sup>3</sup></code> per document</li>
+        <li><code>1 <= word.length <= 50</code></li>
+        <li>Document IDs are unique integers.</li>
+        <li>Words contain alphanumeric characters.</li>
+        <li>Search queries are case-insensitive.</li>
+      </ul>
+    `,
+    starterCode: `from typing import List, Tuple
+
+class WordSearch:
+    def __init__(self, documents: List[Tuple[int, List[str]]]):
+        # Initialize search index
+        pass
+
+    def search(self, word: str) -> List[int]:
+        # Return IDs of all documents containing the given word (case-insensitive)
+        return []`,
+    testCases: [
+      {
+        input: '[["WordSearch", "search", "search", "search", "search"], [[[ [1, ["this", "is", "a", "document"]], [2, ["this", "is", "another", "document"]], [3, ["hello", "world"]] ]], ["this"], ["document"], ["hello"], ["foo"]]]',
+        expected: [null, [1, 2], [1, 2], [3], []]
+      },
+      {
+        input: '[["WordSearch", "search", "search", "search", "search", "search"], [[[ [10, ["Apple", "banana", "APPLE"]], [20, ["banana", "ORANGE"]], [30, ["apple", "grape"]] ]], ["apple"], ["APPLE"], ["banana"], ["Orange"], ["kiwi"]]]',
+        expected: [null, [10, 30], [10, 30], [10, 20], [20], []]
+      },
+      {
+        input: '[["WordSearch", "search", "search"], [[[ [1, []], [2, ["test"]] ]], ["test"], ["empty"]]]',
+        expected: [null, [2], []]
+      },
+      {
+        input: '[["WordSearch", "search", "search", "search"], [[[ [5, ["cat", "dog"]], [2, ["dog", "mouse"]], [9, ["cat"]] ]], ["cat"], ["dog"], ["mouse"]]]',
+        expected: [null, [5, 9], [2, 5], [2]],
+        hidden: true
+      }
+    ],
+    explanation: `
+      <h4>Inverted Index Construction</h4>
+      <p>To support repeated searches efficiently across large collections of documents, build an <strong>Inverted Index</strong> during initialization that maps each unique normalized word to a list or set of document IDs.</p>
+      <p>Deduplicate words per document so multiple occurrences of the same word in a single document do not produce duplicate IDs in the result list.</p>
+    `,
+    followUps: [
+      "How would you make repeated searches efficient?",
+      "Assume there can be 1M+ documents: what data structure and distributed indexing approach would you use?",
+      "What data structure would you use to build an index?",
+      "What are the time and space complexities?"
+    ]
+  },
+  {
+    id: "phrase-search-across-documents",
+    title: "Phrase Search Across Documents",
+    difficulty: "Hard",
+    category: "Data Structure Design",
+    leetcodeLink: "",
+    entryPoint: "PhraseSearch",
+    isClassDesign: true,
+    className: "PhraseSearch",
+    companyTags: ["Google", "Meta", "Amazon", "Uber"],
+    description: `
+      <p>Extend Q1 to support searching for an exact phrase across documents.</p>
+      <p>You are given a list of documents. Each document has a unique ID and contains a sequence of words.</p>
+      <p>Implement the <code>PhraseSearch</code> class:</p>
+      <ul>
+        <li><code>__init__(documents: List[Tuple[int, List[str]]])</code>: Initializes the search index with the given documents.</li>
+        <li><code>search(word: str) -> List[int]</code>: Returns the IDs of all documents containing the given <code>word</code> (case-insensitive).</li>
+        <li><code>search_phrase(phrase: str) -> List[int]</code>: Returns the IDs of all documents containing the exact <code>phrase</code>. A document matches only if all words in the phrase appear <strong>consecutively and in exactly the same order</strong> (case-insensitive).</li>
+      </ul>
+
+      <h5>Example 1:</h5>
+      <pre>
+<strong>Input:</strong>
+documents = [
+    (1, ["this", "is", "a", "document"]),
+    (2, ["this", "is", "another", "document"]),
+    (3, ["hello", "world", "this", "is", "great"])
+]
+
+search_phrase("this is")          → [1, 2, 3]
+search_phrase("is a document")    → [1]
+search_phrase("this is another")  → [2]
+search_phrase("is this")          → []
+search_phrase("hello world")      → [3]
+      </pre>
+      <p><em>Important:</em> <code>"this is"</code> matches only when <code>"this"</code> is immediately followed by <code>"is"</code>.</p>
+
+      <h5>Constraints:</h5>
+      <ul>
+        <li><code>1 <= documents.length <= 10<sup>4</sup></code></li>
+        <li><code>1 <= words.length <= 10<sup>3</sup></code> per document</li>
+        <li><code>1 <= phrase.length <= 500</code></li>
+        <li>Document IDs are unique integers.</li>
+        <li>Words and search phrases are case-insensitive.</li>
+        <li>Phrases can contain repeated words (e.g. <code>"is is"</code>).</li>
+      </ul>
+    `,
+    starterCode: `from typing import List, Tuple
+
+class PhraseSearch:
+    def __init__(self, documents: List[Tuple[int, List[str]]]):
+        # Write your Python solution here
+        pass
+
+    def search(self, word: str) -> List[int]:
+        # Return document IDs containing the word (case-insensitive)
+        return []
+
+    def search_phrase(self, phrase: str) -> List[int]:
+        # Return document IDs containing the consecutive phrase
+        return []`,
+    testCases: [
+      {
+        input: '[["PhraseSearch", "search_phrase", "search_phrase", "search_phrase", "search_phrase", "search_phrase", "search"], [[[ [1, ["this", "is", "a", "document"]], [2, ["this", "is", "another", "document"]], [3, ["hello", "world", "this", "is", "great"]] ]], ["this is"], ["is a document"], ["this is another"], ["is this"], ["hello world"], ["document"]]]',
+        expected: [null, [1, 2, 3], [1], [2], [], [3], [1, 2]]
+      },
+      {
+        input: '[["PhraseSearch", "search_phrase", "search_phrase", "search_phrase", "search_phrase", "search_phrase"], [[[ [1, ["what", "it", "is", "is", "clear"]], [2, ["it", "is", "not", "is", "clear"]], [3, ["is", "is", "is"]] ]], ["is is"], ["is is is"], ["what it is"], ["it is not is"], ["is not"]]]',
+        expected: [null, [1, 3], [3], [1], [2], [2]]
+      },
+      {
+        input: '[["PhraseSearch", "search_phrase", "search_phrase", "search_phrase", "search_phrase", "search_phrase"], [[[ [10, ["The", "Quick", "BROWN", "Fox"]], [20, ["lazy", "DOG", "the", "quick"]] ]], ["the quick"], ["quick brown fox"], ["QUICK brown"], ["lazy dog"], ["fox lazy"]]]',
+        expected: [null, [10, 20], [10], [10], [20], []]
+      },
+      {
+        input: '[["PhraseSearch", "search_phrase", "search_phrase", "search_phrase", "search_phrase"], [[[ [1, ["single"]], [2, ["word", "test"]] ]], ["single"], [""], ["nonexistent phrase"], ["word test extra"]]]',
+        expected: [null, [1], [], [], []],
+        hidden: true
+      }
+    ],
+    explanation: `
+      <h4>Positional Inverted Index</h4>
+      <p>Store word positions per document: <code>word -> {doc_id: set_of_positions}</code>.</p>
+      <p>To check a phrase <code>w_0, w_1, ..., w_{k-1}</code>:</p>
+      <ol>
+        <li>Intersect candidate document IDs that contain all words in the phrase.</li>
+        <li>For each candidate document, verify whether any starting position <code>p</code> satisfies <code>(p + i) in positions(w_i)</code> for all offsets <code>i = 1 ... k-1</code>.</li>
+      </ol>
+    `,
+    followUps: [
+      "How would you efficiently support repeated phrase searches?",
+      "Can you use the same index from Q1? What additional information needs to be stored?",
+      "How would you handle repeated words like 'is is'?",
+      "How would you handle very long phrases, 1M+ documents, dynamic updates, and relevance ranking (TF-IDF / BM25)?"
+    ]
   }
 ];
 
@@ -2993,6 +3173,29 @@ const editorialDetails = {
         steps: ["Check flush and straight conditions.", "Count rank frequencies.", "Construct tuple score and compare."],
         complexity: "O(1) per hand evaluation.",
         pitfall: "Handle A-2-3-4-5 wheel straight (Ace low) correctly."
+    },
+    "word-search-across-documents": {
+        insight: "Pre-index documents using an inverted index (hash map from normalized word to list of document IDs) during initialization to make queries O(1) in average lookup time.",
+        steps: [
+            "Normalize every word to lowercase and collect unique words per document to avoid duplicate doc IDs.",
+            "Map each normalized word to a list or set of document IDs containing it.",
+            "Ensure document IDs in postings are sorted either by inserting in doc_id order or sorting the result.",
+            "In search(word), normalize the query to lowercase and retrieve the list of matching document IDs."
+        ],
+        complexity: "Init: O(N * L) time and space where N is number of documents and L is words per doc. Search: O(1) lookup + O(K) output where K is matching docs.",
+        pitfall: "Words can appear multiple times within a single document; deduplicate per document so the same document ID is not returned repeatedly."
+    },
+    "phrase-search-across-documents": {
+        insight: "Upgrade the inverted index to store occurrence positions per document (doc_id -> set of word indices), then intersect candidate documents and verify consecutive offsets p + i.",
+        steps: [
+            "Build a positional inverted index mapping each lowercased word to a dictionary of doc_id -> set of positions.",
+            "For search_phrase(phrase), split into words and filter candidate documents by intersecting document sets for all words in the phrase.",
+            "For each candidate document, initialize candidate starting positions to the positions of the first word.",
+            "Iterate through subsequent words at offset i: filter candidates to those where p + i is in the set of positions for word i.",
+            "If any starting positions remain for the document, append doc_id to results in sorted order."
+        ],
+        complexity: "Init: O(N * L) time and space. Query: O(k * min_doc_freq + D * k) where D is candidate docs and k is phrase length.",
+        pitfall: "Phrases with repeated words (e.g. 'is is') require evaluating each occurrence position independently without assuming uniqueness of words within the phrase."
     }
 };
 
@@ -3529,7 +3732,76 @@ class Solution:
         s1, s2 = score_hand(hand1), score_hand(hand2)
         if s1 > s2: return 1
         if s1 < s2: return -1
-        return 0`
+        return 0`,
+    "word-search-across-documents": String.raw`from collections import defaultdict
+from typing import List, Tuple
+
+class WordSearch:
+    def __init__(self, documents: List[Tuple[int, List[str]]]):
+        self.index = defaultdict(list)
+        # Sort documents by doc_id to ensure postings lists are always sorted
+        for doc_id, words in sorted(documents, key=lambda x: x[0]):
+            unique_words = {w.lower() for w in words}
+            for w in unique_words:
+                self.index[w].append(doc_id)
+
+    def search(self, word: str) -> List[int]:
+        if not word:
+            return []
+        return list(self.index.get(word.lower(), []))`,
+    "phrase-search-across-documents": String.raw`from collections import defaultdict
+from typing import List, Tuple
+
+class PhraseSearch:
+    def __init__(self, documents: List[Tuple[int, List[str]]]):
+        # index: word -> {doc_id: set of positions}
+        self.index = defaultdict(lambda: defaultdict(set))
+        for doc_id, words in documents:
+            for pos, word in enumerate(words):
+                self.index[word.lower()][doc_id].add(pos)
+
+    def search(self, word: str) -> List[int]:
+        if not word:
+            return []
+        w = word.lower()
+        if w not in self.index:
+            return []
+        return sorted(self.index[w].keys())
+
+    def search_phrase(self, phrase: str) -> List[int]:
+        if not phrase:
+            return []
+        phrase_words = [w.lower() for w in phrase.strip().split() if w]
+        if not phrase_words:
+            return []
+        if len(phrase_words) == 1:
+            return self.search(phrase_words[0])
+
+        first_word = phrase_words[0]
+        if first_word not in self.index:
+            return []
+
+        # Candidate documents must contain all words in the phrase
+        candidate_docs = set(self.index[first_word].keys())
+        for w in phrase_words[1:]:
+            if w not in self.index:
+                return []
+            candidate_docs &= set(self.index[w].keys())
+            if not candidate_docs:
+                return []
+
+        matched_docs = []
+        for doc_id in sorted(candidate_docs):
+            candidates = set(self.index[first_word][doc_id])
+            for i, w in enumerate(phrase_words[1:], 1):
+                w_positions = self.index[w][doc_id]
+                candidates = {p for p in candidates if (p + i) in w_positions}
+                if not candidates:
+                    break
+            if candidates:
+                matched_docs.append(doc_id)
+
+        return matched_docs`
 };
 
 function getEditorial(problem) {
